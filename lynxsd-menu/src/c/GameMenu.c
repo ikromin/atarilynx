@@ -1,32 +1,6 @@
-//Initial version by SainT - Retro HQ
-//22-05-2016	v1.2	GadgetUK		Changed interface colours.  Added Retro HQ logo. Added support for left and right directions, flip, and B button to go back.
-//26-05-2016  v1.3	GadgetUK		Added support for .LSD files (full screen icon + palette, could be extended to contain publisher info etc).
-//29-05-2016  v1.4	GadgetUK		Added support for .LYX and .O files - automatic block sizing based on file size.
-//29-05-2016  v1.5  GadgetUK		Removed the facility to show 20 chars of text from the end of the .LSD file - It's too slow.
-//01-06-2016  v1.6  SainT				Completed homebrew support.
-//25-06-2016  v1.7  GadgetUK		Added .com files into allowed list (same header as other homebrew).  Also fixed problem with Power Factor and added code to change text colour for loading message.
-//25-06-2016  v1.8  GadgetUK		Added delay to homebrew loading - seemed to randomly fail to load.  Also fixed colour bug related to previews, and scaling bug related to previews.
-
-
-////////////////////////////////////////////////////////////////////////////////
-//
-// Includes
-//
-////////////////////////////////////////////////////////////////////////////////
-
-#include <stdlib.h>
-#include <6502.h>
-#include <lynx.h>
-#include <tgi.h>
-#include <peekpoke.h>
-#include <string.h>
-#include <joystick.h>
+#include "GameMenu.h"
 #include "LynxSD.h"
-#include <conio.h>
 
-extern char lynxtgi[];
-extern char lynxjoy[];
-extern char icon[];
 char preview[8365];
 
 u8 nPreviewDelay = 0;
