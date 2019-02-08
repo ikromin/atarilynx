@@ -671,7 +671,7 @@ void main(void)
 
 //-- If A is held during boot, load the last ROM up
 
-		if (JOY_BTN_FIRE(joy_read(JOY_1)))
+		if (JOY_BTN_1(joy_read(JOY_1)))
 		{
 			tgi_clear();
 			tgi_setbgcolor(0);
@@ -727,24 +727,24 @@ void main(void)
 
 		//-- Reset the repeat counters
 
-			if (JOY_BTN_UP(nPressed|nReleased))
+			if (JOY_UP(nPressed|nReleased))
 			{
 				nJoyUp = 0;
 				nJoyUpDelay = 14;
 			}
-			if (JOY_BTN_DOWN(nPressed|nReleased))
+			if (JOY_DOWN(nPressed|nReleased))
 			{
 				nJoyDown = 0;
 				nJoyDownDelay = 14;
 			}
 
-			if (JOY_BTN_RIGHT(nPressed|nReleased))
+			if (JOY_RIGHT(nPressed|nReleased))
 			{
 				nJoyRight = 0;
 				nJoyRightDelay = 14;
 			}
 
-			if (JOY_BTN_LEFT(nPressed|nReleased))
+			if (JOY_LEFT(nPressed|nReleased))
 			{
 				nJoyLeft = 0;
 				nJoyLeftDelay = 14;
@@ -752,7 +752,7 @@ void main(void)
 
 		//-- Update the repeat counters
 
-			if (JOY_BTN_UP(nThisJoy))
+			if (JOY_UP(nThisJoy))
 			{
 				nJoyUp++;
 				if (nJoyUp > nJoyUpDelay)
@@ -761,7 +761,7 @@ void main(void)
 					nJoyUpDelay = 2;
 				}
 			}
-			if (JOY_BTN_DOWN(nThisJoy))
+			if (JOY_DOWN(nThisJoy))
 			{
 				nJoyDown++;
 				if (nJoyDown > nJoyDownDelay)
@@ -771,7 +771,7 @@ void main(void)
 				}
 			}
 
-			if (JOY_BTN_RIGHT(nThisJoy))
+			if (JOY_RIGHT(nThisJoy))
 			{
 				nJoyRight++;
 				if (nJoyRight > nJoyRightDelay)
@@ -781,7 +781,7 @@ void main(void)
 				}
 			}
 
-			if (JOY_BTN_LEFT(nThisJoy))
+			if (JOY_LEFT(nThisJoy))
 			{
 				nJoyLeft++;
 				if (nJoyLeft > nJoyLeftDelay)
@@ -862,7 +862,7 @@ void main(void)
 
 			}
 
-			if (JOY_BTN_FIRE(nReleased))
+			if (JOY_BTN_1(nReleased))
 			{
 				SDirEntry *pDir = &gsDirEntry[ganDirOrder[gnSelectedLine]];
 
@@ -979,7 +979,7 @@ void main(void)
 			}
 			else
 			{
-				if (JOY_BTN_FIRE2(nReleased))
+				if (JOY_BTN_2(nReleased))
 				{
 					SDirEntry *pDir = &gsDirEntry[ganDirOrder[0]];
 					gnSelectedLine = 0;
