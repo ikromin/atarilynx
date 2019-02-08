@@ -10,6 +10,8 @@
 u8 gnNumDirEntries = 0;
 u8 ganDirOrder[256];
 SDirEntry gsDirEntry[256];
+char gszCurrentDir[256] = "";
+char gszCurrentFile[13] = "";
 
 
 static void __fastcall__ AddDirEntry(const char *pIn, u8 bIsDir)
