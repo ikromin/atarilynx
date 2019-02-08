@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <script src="js/external/jquery-2.2.4.min.js"></script>
+    <script src="js/external/browserfs.143.min.js"></script>
+
+    <title>RetroArch based Web Emulator for Atari Lynx | Atari Gamer</title>
+
+    <style>
+      body {
+        background-color: #444;
+        color: #eee;
+        font-family: monospace;
+        background-image: repeating-linear-gradient(
+          0deg,
+          rgba(190,90,90,0.15) 0px,
+          rgba(190,90,90,0.15) 1px,
+          transparent 1px,
+          transparent 2px
+        );
+      }
+
+      a {
+        color: #FF8C00;
+      }
+      
+      table {
+        border-spacing: 10px 5px;
+      }
+      
+      th {
+        text-align: left;
+        background-color: #555;
+        padding: 0.25em;
+      }
+
+      .at_play_dnd_area {
+        background-color: black;
+        color: #FF8C00;
+        margin-bottom: 0.5em;
+        padding: 0.25em;
+      }
+
+      .at_play_dnd_area_hover {
+        background-color: #FF8C00;
+        color: black;
+      }
+    </style>
+  </head>
+  <body>
+
+  <div style="float:right">
+    <div style="text-align:right; padding-right:10px; padding-bottom:10px;">Controls</div>
+    <table class="at_play_tbl">
+      <tr><th>Lynx</th><th>Keyboard</th></tr>
+      <tr><td>D-Pad Up</td><td>Up Arrow</td></tr>
+      <tr><td>D-Pad Right</td><td>Right Arrow</td></tr>
+      <tr><td>D-Pad Down</td><td>Down Arrow</td></tr>
+      <tr><td>D-Pad Left</td><td>Left Arrow</td></tr>
+      <tr><td>Option 1</td><td>Q</td></tr>
+      <tr><td>Option 2</td><td>W</td></tr>
+      <tr><td>Pause</td><td>Enter</td></tr>
+      <tr><td>A Button</td><td>X</td></tr>
+      <tr><td>B Button</td><td>Z</td></tr>
+      <tr><td>Audio Mute</td><td>F9</td></tr>
+      <tr><td>Fast Forward</td><td>Space</td></tr>
+      <tr><td>Fast Forward Hold</td><td>L</td></tr>
+      <tr><td>Slow Motion</td><td>E</td></tr>
+    </table>
+  </div>
+
+  <div style="display:inline-block;position:relative;">
+    <canvas id="canvas" tabindex="1" oncontextmenu="event.preventDefault()" width="320" height="204" style="background-color: black"></canvas>
+    <div class="at_play_dnd_area"></div>
+  </div>
+
+  <div style="margin-top:1em;">
+    Screen scale:&nbsp;
+    <a href="#" class="at_nav_link at_canv_resize" data-value="1">1x</a>
+    <a href="#" class="at_nav_link at_canv_resize" data-value="2">2x</a>
+    <a href="#" class="at_nav_link at_canv_resize" data-value="3">3x</a>
+    <a href="#" class="at_nav_link at_canv_resize" data-value="4">4x</a>
+  </div>
+  
+  <div style="margin-top: 1em" id="at_rom_select">
+    Select a ROM file -<br/>
+    <input type="file" name="file" id="at_file_select">
+  </div>
+
+  <script src="js/atga_play.js"></script>
+  <script src="js/external/handy_libretro.js"></script>
+  <script>
+    Module.asmLibraryArg["_emscripten_set_wheel_callback"] = function() { };
+  </script>
+
+  </body>
+</html>
