@@ -42,16 +42,6 @@ SCB_REHV_PAL previewsprite =  {
 	{0x01,0x23,0x45,0x67,0x89,0xAB,0xCD,0xEF}
 };
 
-
-////////////////////////////////////////////////////////////////////////////////
-//
-// Lynx registers
-//
-////////////////////////////////////////////////////////////////////////////////
-
-#define MSTERE0 ((volatile u8 *) 0xFD50)
-#define MAPCTL ((volatile u8 *) 0xFFF9)
-
 ////////////////////////////////////////////////////////////////////////////////
 //
 // Globals
@@ -265,45 +255,6 @@ void CancelPreview()
 	gnIconLine = 255;
 }
 
-void LaunchROM()
-{
-		u8 *ptr;
-		u8 count;
-
-		tgi_setpalette(blackpal);
-
-		LynxSD_LowPowerMode();
-		*MSTERE0 = 0; // enable all audio channels
-		asm("sei");
-		*MAPCTL = 0; // memory mapping for boot state
-
-		ptr = (u8*) 0xfd00; // timers and audio fd00
-		count = 0x40;//40
-		while (count--)
-		{
-			*ptr++ = 0;
-		}
-
-		tgi_clear();
-
-		*((u8*) 0xFD80) = 0;
-		*((u8*) 0xFD81) = 0;
-		*((u8*) 0xFD92) = 0;
-		*((u8*) 0xFD9C) = 0;
-		*((u8*) 0xFD9D) = 0;
-		*((u8*) 0xFD9E) = 0;
-		*((u8*) 0xFD9D) = 0;
-
-		ptr = (u8*) 0xfda0; // palette
-		count = 0x20;
-		while (count--)
-		{
-			*ptr++ = 0;
-		}
-
-		asm("brk");	
-}
-
 void main(void) 
 {	
 	u8 nJoyDown = 0, nJoyUp = 0, nLastJoy = 0, nJoyDownDelay = 0, nJoyUpDelay = 0;
@@ -340,6 +291,8 @@ void main(void)
 						
 			if (LynxSD_Program(gszCurrentDir) == FR_OK)
 			{
+				tgi_setpalette(blackpal);
+				tgi_clear();
 				LaunchROM();
 			}
 		}
@@ -631,6 +584,8 @@ void main(void)
 
 							while (nDelay--);
 
+							tgi_setpalette(blackpal);
+							tgi_clear();
 							LaunchROM();
 							*pCurrentEnd = 0;
 						}

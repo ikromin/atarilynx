@@ -7,6 +7,11 @@
  */
 
 
+// Lynx registers
+#define MSTERE0 ((volatile u8 *) 0xFD50)
+#define MAPCTL ((volatile u8 *) 0xFFF9)
+
+
 // Object loader from David Huseby and Karri Kaksonen
 static u8 gObjectLoader[] =
 {
@@ -184,4 +189,40 @@ FRESULT __fastcall__ LynxSD_ProgramHomebrew(const char *pFilename)
       }
     }
   return res;
+}
+
+
+void LaunchROM()
+{
+		u8 *ptr;
+		u8 count;
+
+		LynxSD_LowPowerMode();
+		*MSTERE0 = 0; // enable all audio channels
+		asm("sei");
+		*MAPCTL = 0; // memory mapping for boot state
+
+		ptr = (u8*) 0xfd00; // timers and audio fd00
+		count = 0x40;//40
+		while (count--)
+		{
+			*ptr++ = 0;
+		}
+
+		*((u8*) 0xFD80) = 0;
+		*((u8*) 0xFD81) = 0;
+		*((u8*) 0xFD92) = 0;
+		*((u8*) 0xFD9C) = 0;
+		*((u8*) 0xFD9D) = 0;
+		*((u8*) 0xFD9E) = 0;
+		*((u8*) 0xFD9D) = 0;
+
+		ptr = (u8*) 0xfda0; // palette
+		count = 0x20;
+		while (count--)
+		{
+			*ptr++ = 0;
+		}
+
+		asm("brk");	
 }
