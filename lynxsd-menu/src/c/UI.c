@@ -11,12 +11,12 @@ extern char aglogo[];
 // pallete colours in 0x0GBR format, 4 rows of 4 colours each
 unsigned char masterpal[] = {
   // green values
-  0x0000 >> 8,    0x000c >> 8,    0x0333 >> 8,    0x0444 >> 8,
+  0x0000 >> 8,    0x000b >> 8,    0x0333 >> 8,    0x0444 >> 8,
   0x0999 >> 8,    0x0115 >> 8,    0x0aaa >> 8,    0x0aaa >> 8,
   0x0aaa >> 8,    0x0aaa >> 8,    0x0aaa >> 8,    0x0aaa >> 8,
   0x0aaa >> 8,    0x0aaa >> 8,    0x0aaa >> 8,    0x0aaa >> 8,
   // blue and red values
-  0x0000 & 0xff,  0x000c & 0xff,  0x0333 & 0xff,  0x0444 & 0xff,	
+  0x0000 & 0xff,  0x000b & 0xff,  0x0333 & 0xff,  0x0444 & 0xff,	
   0x0999 & 0xff,  0x0115 & 0xff,  0x0aaa & 0xff,  0x0aaa & 0xff,
   0x0aaa & 0xff,  0x0aaa & 0xff,  0x0aaa & 0xff,  0x0aaa & 0xff,	
   0x0aaa & 0xff,  0x0aaa & 0xff,  0x0aaa & 0xff,  0x0aaa & 0xff
@@ -612,10 +612,16 @@ void showLoadingScreen() {
  * Sets up initial palletes by creating an all black colour pallete and copying
  * the master pallete into the current pallete.
  */
-void setupInitialPalletes() {
+void UI_init() {
   unsigned char i = 0;
   for (i = 0; i < 16; i++) {
     blackpal[i] = 0x00;
     currentpal[i] = masterpal[i];
   }
+
+  tgi_setpalette(masterpal);
+	tgi_setbgcolor(0);
+
+  tgi_clear();
+  tgi_updatedisplay();
 }

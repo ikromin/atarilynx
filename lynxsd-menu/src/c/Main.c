@@ -5,16 +5,10 @@ void initialize()
 {
 	tgi_install(&lynxtgi);
 	tgi_init();
-	CLI();
-	
+	CLI();	
 	while (tgi_busy());
 
-	setupInitialPalletes();
-
-	tgi_setpalette(masterpal);
-	tgi_setcolor(9);
-	tgi_setbgcolor(0); 
-	tgi_clear();
+	UI_init();
 
 	joy_install(&lynxjoy);
 }
