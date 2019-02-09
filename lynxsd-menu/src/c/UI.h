@@ -16,5 +16,7 @@ extern unsigned char blackpal[];
 
 void runUI();
 void showLastRomScreen(char romFileName[]);
+void showLoadingScreen();
+void setupInitialPalletes();
 
 #endif // __LYNX_SD_UI__

@@ -9,6 +9,8 @@ void initialize()
 	
 	while (tgi_busy());
 
+	setupInitialPalletes();
+
 	tgi_setpalette(masterpal);
 	tgi_setcolor(9);
 	tgi_setbgcolor(0); 
@@ -50,12 +52,8 @@ void main(void)
 	initialize();
 	LynxSD_Init();
 
-	tgi_setcolor(9);
-	tgi_setbgcolor(0);
-	tgi_clear();
-	tgi_updatedisplay();
-
 	if (!runLastROM()) {
+		showLoadingScreen();
 		runUI();
 	}
 	

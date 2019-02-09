@@ -2,6 +2,7 @@
 
 #define TXT_ATARIGAMER "atarigamer.com"
 #define TXT_LASTROM "Loading last ROM..."
+#define TXT_LOADING "Loading ROM list..."
 
 // Logo icon reference
 extern char icon[];
@@ -11,34 +12,18 @@ extern char aglogo[];
 unsigned char masterpal[] = {
   // green values
   0x0000 >> 8,    0x000c >> 8,    0x0333 >> 8,    0x0444 >> 8,
-  0x0fff >> 8,    0x0115 >> 8,    0x0aaa >> 8,    0x0aaa >> 8,
+  0x0999 >> 8,    0x0115 >> 8,    0x0aaa >> 8,    0x0aaa >> 8,
   0x0aaa >> 8,    0x0aaa >> 8,    0x0aaa >> 8,    0x0aaa >> 8,
   0x0aaa >> 8,    0x0aaa >> 8,    0x0aaa >> 8,    0x0aaa >> 8,
   // blue and red values
   0x0000 & 0xff,  0x000c & 0xff,  0x0333 & 0xff,  0x0444 & 0xff,	
-  0x0fff & 0xff,  0x0115 & 0xff,  0x0aaa & 0xff,  0x0aaa & 0xff,
+  0x0999 & 0xff,  0x0115 & 0xff,  0x0aaa & 0xff,  0x0aaa & 0xff,
   0x0aaa & 0xff,  0x0aaa & 0xff,  0x0aaa & 0xff,  0x0aaa & 0xff,	
   0x0aaa & 0xff,  0x0aaa & 0xff,  0x0aaa & 0xff,  0x0aaa & 0xff
 };
 
-unsigned char blackpal[] =
-{
-  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-	0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
-};
-
-unsigned char currentpal[] = {
-  // green values
-  0x0000 >> 8,    0x000c >> 8,    0x0333 >> 8,    0x0444 >> 8,
-  0x0eee >> 8,    0x0115 >> 8,    0x0aaa >> 8,    0x0aaa >> 8,
-  0x0aaa >> 8,    0x0aaa >> 8,    0x0aaa >> 8,    0x0aaa >> 8,
-  0x0aaa >> 8,    0x0aaa >> 8,    0x0aaa >> 8,    0x0aaa >> 8,
-  // blue and red values
-  0x0000 & 0xff,  0x000c & 0xff,  0x0333 & 0xff,  0x0444 & 0xff,	
-  0x0eee & 0xff,  0x0115 & 0xff,  0x0aaa & 0xff,  0x0aaa & 0xff,
-  0x0aaa & 0xff,  0x0aaa & 0xff,  0x0aaa & 0xff,  0x0aaa & 0xff,	
-  0x0aaa & 0xff,  0x0aaa & 0xff,  0x0aaa & 0xff,  0x0aaa & 0xff
-};
+unsigned char blackpal[16];
+unsigned char currentpal[16];
 
 static char preview[8365];
 static u8 nPreviewDelay = 0;
@@ -265,13 +250,6 @@ static void CancelPreview()
 void runUI() {
   u8 nJoyDown = 0, nJoyUp = 0, nLastJoy = 0, nJoyDownDelay = 0, nJoyUpDelay = 0;
 	u8 nJoyRight = 0, nJoyLeft = 0, nJoyRightDelay = 0, nJoyLeftDelay = 0;
-
-  tgi_clear();
-	tgi_setcolor(13);
-	tgi_outtextxy(40, 36, "Menu v1.8");
-	tgi_outtextxy(40, 46, "Reading...");
-	tgi_setcolor(9);
-	tgi_updatedisplay();
 
 	ReadDirectory(gszCurrentDir);
 
@@ -594,6 +572,9 @@ void runUI() {
 	};
 }
 
+/**
+ * Screen to display when a previous ROM is being loaded on startup. 
+ **/
 void showLastRomScreen(char romFileName[]) {
   tgi_clear();
   tgi_setbgcolor(0);
@@ -608,4 +589,33 @@ void showLastRomScreen(char romFileName[]) {
   tgi_sprite(&logoSprite);
 
   tgi_updatedisplay();
+}
+
+/**
+ * Screen to display when the ROM list is loading.
+ */
+void showLoadingScreen() {
+  tgi_clear();
+	
+  tgi_setcolor(5);
+  tgi_outtextxy(23, 55, TXT_ATARIGAMER);
+
+  tgi_setcolor(6);
+  tgi_outtextxy(0, 92, TXT_LOADING);
+
+  tgi_sprite(&logoSprite);
+
+	tgi_updatedisplay();
+}
+
+/**
+ * Sets up initial palletes by creating an all black colour pallete and copying
+ * the master pallete into the current pallete.
+ */
+void setupInitialPalletes() {
+  unsigned char i = 0;
+  for (i = 0; i < 16; i++) {
+    blackpal[i] = 0x00;
+    currentpal[i] = masterpal[i];
+  }
 }
