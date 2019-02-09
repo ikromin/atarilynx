@@ -1,5 +1,12 @@
 #include "UI.h"
 
+/*
+ ******************************************************************************
+ Functions for rendering the user interface
+ ******************************************************************************
+ */
+
+
 #define TXT_ATARIGAMER "atarigamer.com"
 #define TXT_LASTROM "Loading last ROM..."
 #define TXT_LOADING "Loading ROM list..."
@@ -247,7 +254,7 @@ static void CancelPreview()
 }
 
 
-void runUI() {
+void UI_run() {
   u8 nJoyDown = 0, nJoyUp = 0, nLastJoy = 0, nJoyDownDelay = 0, nJoyUpDelay = 0;
 	u8 nJoyRight = 0, nJoyLeft = 0, nJoyRightDelay = 0, nJoyLeftDelay = 0;
 
@@ -575,7 +582,7 @@ void runUI() {
 /**
  * Screen to display when a previous ROM is being loaded on startup. 
  **/
-void showLastRomScreen(char romFileName[]) {
+void UI_showLastRomScreen(char romFileName[]) {
   tgi_clear();
   tgi_setbgcolor(0);
   
@@ -594,7 +601,7 @@ void showLastRomScreen(char romFileName[]) {
 /**
  * Screen to display when the ROM list is loading.
  */
-void showLoadingScreen() {
+void UI_showLoadingScreen() {
   tgi_clear();
 	
   tgi_setcolor(5);

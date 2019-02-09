@@ -25,7 +25,7 @@ unsigned char runLastROM() {
 			LynxSD_ReadFile(romFileName, 256);
 			LynxSD_CloseFile();
 
-			showLastRomScreen(romFileName);
+			UI_showLastRomScreen(romFileName);
 						
 			if (LynxSD_Program(romFileName) == FR_OK)
 			{
@@ -47,8 +47,8 @@ void main(void)
 	LynxSD_Init();
 
 	if (!runLastROM()) {
-		showLoadingScreen();
-		runUI();
+		UI_showLoadingScreen();
+		UI_run();
 	}
 	
 }

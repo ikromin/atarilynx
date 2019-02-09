@@ -14,9 +14,9 @@
 extern unsigned char masterpal[];
 extern unsigned char blackpal[];
 
-void runUI();
-void showLastRomScreen(char romFileName[]);
-void showLoadingScreen();
+void UI_run();
+void UI_showLastRomScreen(char romFileName[]);
+void UI_showLoadingScreen();
 void UI_init();
 
 #endif // __LYNX_SD_UI__
