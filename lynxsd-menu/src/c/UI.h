@@ -15,5 +15,6 @@ extern unsigned char masterpal[];
 extern unsigned char blackpal[];
 
 void runUI();
+void showLastRomScreen(char romFileName[]);
 
 #endif // __LYNX_SD_UI__

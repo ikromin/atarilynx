@@ -4,16 +4,12 @@
 void initialize()
 {
 	tgi_install(&lynxtgi);
-	tgi_setpalette(blackpal);
 	tgi_init();
 	CLI();
 	
-	while (tgi_busy()) 
-	{ 
-	};
+	while (tgi_busy());
 
 	tgi_setpalette(masterpal);
-
 	tgi_setcolor(9);
 	tgi_setbgcolor(0); 
 	tgi_clear();
@@ -22,57 +18,45 @@ void initialize()
 }
 
 
-void main(void) 
-{
-	LynxSD_Init();
+unsigned char runLastROM() {
+	char romFileName[256];
 
-	initialize();
-
-	tgi_setcolor(9);
-	tgi_setbgcolor(0);
-
-	tgi_clear();
-	tgi_updatedisplay();
-
-
-	if (LynxSD_OpenFile("menu/lastrom") == FR_OK)
+	//-- If A is held during boot, load the last ROM up
+	if (JOY_BTN_1(joy_read(JOY_1)))
 	{
-		char *pFile;
-
-		LynxSD_ReadFile(gszCurrentDir, 256);
-		LynxSD_CloseFile();
-
-		//-- If A is held during boot, load the last ROM up
-		if (JOY_BTN_1(joy_read(JOY_1)))
+		if (LynxSD_OpenFile("menu/lastrom") == FR_OK)
 		{
-			tgi_clear();
-			tgi_setbgcolor(0);
-			tgi_setcolor(9);
-			tgi_outtextxy(24, 46, "Programming...");
-			tgi_setbgcolor(0);
-			tgi_updatedisplay();
+			LynxSD_ReadFile(romFileName, 256);
+			LynxSD_CloseFile();
+
+			showLastRomScreen(romFileName);
 						
-			if (LynxSD_Program(gszCurrentDir) == FR_OK)
+			if (LynxSD_Program(romFileName) == FR_OK)
 			{
 				tgi_setpalette(blackpal);
 				tgi_clear();
 				LaunchROM();
+				return 1;
 			}
-		}
-
-		pFile = gszCurrentDir + strlen(gszCurrentDir);
-		while (pFile > gszCurrentDir && *pFile != '/') pFile--;
-		if (*pFile == '/')
-		{
-			*pFile++ = 0;
-			strcpy(gszCurrentFile, pFile);
-		}
-		else
-		{
-			strcpy(gszCurrentFile, gszCurrentDir);
-			gszCurrentDir[0] = 0;
 		}
 	}
 
-	runUI();
+	return 0;
+}
+
+
+void main(void) 
+{
+	initialize();
+	LynxSD_Init();
+
+	tgi_setcolor(9);
+	tgi_setbgcolor(0);
+	tgi_clear();
+	tgi_updatedisplay();
+
+	if (!runLastROM()) {
+		runUI();
+	}
+	
 }

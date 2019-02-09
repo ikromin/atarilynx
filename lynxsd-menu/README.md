@@ -10,6 +10,9 @@ To build run ```make all```. This will produce a file ```menu.bin``` that can be
 
 # Change Log
 
+Version 2.0 Atari Gamer
+* Load last ROM feature optimised and has a new screen that shows the ROM file being loaded
+
 Below is the original Change Log from the original sources. This information has now been removed from all source files and will be maintained here instead.
 
 ```

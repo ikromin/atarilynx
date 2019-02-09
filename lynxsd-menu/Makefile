@@ -28,7 +28,7 @@ SEGMENTS=--code-name CODE --rodata-name RODATA --bss-name BSS --data-name DATA
 ASFLAGS=-t $(SYS) -I $(CC65_ASMINC)
 CFLAGS=$(SEGMENTS) --all-cdecl -I . -t $(SYS) -Cl -Or -O
 LDFLAGS=-t $(SYS) $(SYS).lib
-SPRFLAGS=-t6 -p2 -u
+SPRFLAGS=-t6 -p1
 
 .SUFFIXES:
 .PHONY: clean mkbuild all
