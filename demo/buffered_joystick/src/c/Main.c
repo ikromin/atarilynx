@@ -61,11 +61,11 @@ void drawScreen() {
 	tgi_bar (61, 41,			// right joy button
 						81, 61);
 
-	tgi_setcolor(BJOY_A ? COLOR_ON : COLOR_OFF);
+	tgi_setcolor(BJOY_B ? COLOR_ON : COLOR_OFF);
 	tgi_bar (90, 20,			// B button
 						110, 40);
 	
-	tgi_setcolor(BJOY_B ? COLOR_ON : COLOR_OFF);
+	tgi_setcolor(BJOY_A ? COLOR_ON : COLOR_OFF);
 	tgi_bar (120, 20,			// A button
 						140, 40);
 
@@ -75,7 +75,12 @@ void drawScreen() {
 
 void main(void) 
 {
-	//unsigned char curJoyState;
+	// clear hardware pallete to start with a blank screen
+	unsigned char* ptr = 0xfda0;
+	unsigned char count = 0x20;
+	while (count--) {
+		*ptr++ = 0;
+	}
 
 	// install TGI driver
 	tgi_install(&lynxtgi);
