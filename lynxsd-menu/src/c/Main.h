@@ -4,6 +4,7 @@
 #include <6502.h>
 #include <tgi.h>
 #include <joystick.h>
+#include <conio.h>
 
 #include "LynxSD.h"
 #include "Joystick.h"

@@ -156,6 +156,22 @@ void processLoop() {
 		else if (BJOY_LEFT) UI_selectPrevious2();
 		else if (BJOY_DOWN) UI_selectNext();
 		else if (BJOY_RIGHT) UI_selectNext2();
+
+		// process other buttons
+		if (kbhit()) {
+			char key = cgetc();
+			switch (key) {
+				case 'F':
+					tgi_flip();
+					break;
+
+				case '2':
+					waitingForInput = 1;
+					UI_showHelpScreen();
+					break;
+			}
+		}
+
 		// read in directory contents if required
 		if (dirListLoaded == 0) {
 			UI_showLoadingScreen();
