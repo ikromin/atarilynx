@@ -6,12 +6,11 @@
  ******************************************************************************
  */
 
-
+char gszCurrentDir[256] = "";
+u8 gnSelectIndex = 0;
 u8 gnNumDirEntries = 0;
 u8 ganDirOrder[256];
 SDirEntry gsDirEntry[256];
-char gszCurrentDir[256] = "";
-char gszCurrentFile[13] = "";
 
 
 static void __fastcall__ AddDirEntry(const char *pIn, u8 bIsDir)
@@ -69,10 +68,6 @@ void __fastcall__ ReadDirectory(const char *pDir)
  
   //-- If this is a subdir, add ".." as first entry
 	gnNumDirEntries = 0;
-	if (pDir[0] != 0)
-	{
-		AddDirEntry("..", 1);
-	}
 
   //-- Open and read the dir
 	if (LynxSD_OpenDir(pDir) == FR_OK)
