@@ -66,7 +66,6 @@ void __fastcall__ ReadDirectory(const char *pDir)
 	const char *pExt;
 	u8 bIsLnxFile;
  
-  //-- If this is a subdir, add ".." as first entry
 	gnNumDirEntries = 0;
 
   //-- Open and read the dir
