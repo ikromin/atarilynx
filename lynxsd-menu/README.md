@@ -11,7 +11,12 @@ To build run ```make all```. This will produce a file ```menu.bin``` that can be
 # Change Log
 
 Version 2.0 Atari Gamer
-* Load last ROM feature optimised and has a new screen that shows the ROM file being loaded
+* Whole new UI experience
+ * Faster scrolling in the file list
+ * Scrollbar showing location of selected file in the overall list
+ * Moving back a directory is done with the B button
+* Load last ROM feature optimised to start a little faster
+* Help screen shown on startup
 
 Below is the original Change Log from the original sources. This information has now been removed from all source files and will be maintained here instead.
 
