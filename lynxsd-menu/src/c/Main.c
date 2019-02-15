@@ -130,12 +130,8 @@ void processLoop() {
 	while (1) {
 		Joy_Buffer();
 		
-		// process joystick actions
-		if (BJOY_UP) UI_selectPrevious();
-		else if (BJOY_LEFT) UI_selectPrevious2();
-		else if (BJOY_DOWN) UI_selectNext();
-		else if (BJOY_RIGHT) UI_selectNext2();
-		else if (BJOY_A) {
+		// process joystick buttons
+		if (BJOY_A) {
 			WAIT_FOR_INPUT_CHECK
 
 			pDir = &gsDirEntry[ganDirOrder[gnSelectIndex]];
@@ -155,6 +151,11 @@ void processLoop() {
 		// nothing else to do if waiting for inputs
 		if (waitingForInput == 1) continue;
 
+		// process joystick d-pad
+		if (BJOY_UP) UI_selectPrevious();
+		else if (BJOY_LEFT) UI_selectPrevious2();
+		else if (BJOY_DOWN) UI_selectNext();
+		else if (BJOY_RIGHT) UI_selectNext2();
 		// read in directory contents if required
 		if (dirListLoaded == 0) {
 			UI_showLoadingScreen();
