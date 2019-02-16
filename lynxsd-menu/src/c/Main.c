@@ -105,6 +105,8 @@ static void changeToDirectory(char dirName[]) {
 				*dirPtr = 0;
 			}
 		}
+
+		UI_backAction();
 	}
 	// or go forward a directory by name
 	else {
@@ -112,8 +114,11 @@ static void changeToDirectory(char dirName[]) {
 
 		if (gszCurrentDir[0]) strcat(gszCurrentDir, "/");
 		strcat(gszCurrentDir, dirName);
+
+		UI_forwardAction();
 	}
 
+	gnSelectIndex = 0;
 	dirListLoaded = 0;
 }
 

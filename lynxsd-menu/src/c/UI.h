@@ -25,6 +25,9 @@ void UI_selectNext();
 void UI_selectPrevious2();
 void UI_selectNext2();
 
+void UI_forwardAction();
+void UI_backAction();
+
 void UI_render();
 
 #endif // __LYNX_SD_UI__
