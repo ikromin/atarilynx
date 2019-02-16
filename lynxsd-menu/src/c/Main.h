@@ -5,10 +5,13 @@
 #include <tgi.h>
 #include <joystick.h>
 #include <conio.h>
+#include <string.h>
 
 #include "LynxSD.h"
 #include "Joystick.h"
 #include "UI.h"
+#include "Program.h"
+#include "Directory.h"
 
 // TGI and Joystick library references
 extern char lynxtgi[];

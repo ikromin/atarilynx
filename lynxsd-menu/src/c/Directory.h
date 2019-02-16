@@ -1,7 +1,6 @@
 #ifndef __LYNX_SD_DIRECTORY__
 #define __LYNX_SD_DIRECTORY__
 
-#include <string.h>
 #include "LynxSD.h"
 
 extern char gszCurrentDir[256];

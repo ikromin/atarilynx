@@ -1,4 +1,8 @@
+#include <tgi.h>
+#include <string.h>
 #include "UI.h"
+#include "Directory.h"
+#include "Sprites.h"
 
 /*
  ******************************************************************************

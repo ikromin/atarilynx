@@ -1,7 +1,6 @@
 #ifndef __LYNX_SD_JOYSTICK__
 #define __LYNX_SD_JOYSTICK__
 
-#include <joystick.h>
 #include "LynxSD.h"
 
 // macros for joystick states

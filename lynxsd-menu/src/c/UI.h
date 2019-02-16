@@ -1,15 +1,6 @@
 #ifndef __LYNX_SD_UI__
 #define __LYNX_SD_UI__
 
-#include <stdlib.h>
-#include <6502.h>
-#include <tgi.h>
-#include <string.h>
-#include "LynxSD.h"
-#include "Directory.h"
-#include "Joystick.h"
-#include "Program.h"
-
 #define MAX_UI_LINES 7
 
 void UI_init();
