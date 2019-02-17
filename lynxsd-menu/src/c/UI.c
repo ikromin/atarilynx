@@ -233,7 +233,7 @@ void UI_backAction() {
 
 void UI_render() {
 	SDirEntry* dirEntry;
-  u32 scrollPos = (7500 * (u32) gnSelectIndex) / (100 * (u32) gnNumDirEntries);
+  u32 scrollPos = (7400 * (u32) gnSelectIndex) / (100 * (u32) (gnNumDirEntries - 1));
   u8 highlightOffset = 10 * currentUiLine;
   u8 curLine, startIndex, lineIndex;
 
