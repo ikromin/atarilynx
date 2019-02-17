@@ -263,7 +263,7 @@ void UI_render() {
   }
 
   // display current directory
-  tgi_outtextxy(6, 89, (gszCurrentDir[0] == 0 ? TXT_ROOT_DIR : gszCurrentDir));
+  tgi_outtextxy(5, 89, (gszCurrentDir[0] == 0 ? TXT_ROOT_DIR : gszCurrentDir));
 
   tgi_setcolor(1);
   tgi_bar(153, 5 + scrollPos, 154, 9 + scrollPos); // scrollbar indicator
