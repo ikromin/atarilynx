@@ -96,7 +96,7 @@ void __fastcall__ ReadDirectory(const char *pDir)
 			{
 				if (!((sInfo.fattrib & AM_DIR) && (strcmp("MENU", sInfo.fname) == 0))) // special case ignore the "menu" folder
 				{
-					AddDirEntry(sInfo.fname, sInfo.fattrib & AM_DIR);
+					AddDirEntry(sInfo.fname, (sInfo.fattrib & AM_DIR) != 0 );
 				}
 			}
 		}

@@ -24,6 +24,8 @@
 extern u8 joystickActionDelay;
 extern char gszCurrentDir[256];
 
+static char* fileTypesMap[] = {
+  &img_rom[0], &img_dir[0], &img_yes[0], &img_no[0]
 };
 
 // pallete colours in 0x0GBR format, 4 rows of 4 colours each
@@ -252,14 +254,10 @@ void UI_render() {
 
     dirEntry = &gsDirEntry[ganDirOrder[lineIndex]];
   
-    if (dirEntry->bDirectory) {
-      tgi_outtextxy(5, (curLine * 10) + 6, dirEntry->szFilename);
-      (&fileSprite)->data = &dir[0];
-    }
-    else {
-      tgi_outtextxy(5, (curLine * 10) + 6, dirEntry->szFilename);
-      (&fileSprite)->data = &rom[0];
-    }
+    // sprite data picked from file type map
+    (&fileSprite)->data = fileTypesMap[dirEntry->bDirectory];
+
+    tgi_outtextxy(5, (curLine * 10) + 6, dirEntry->szFilename);
     (&fileSprite)->vpos = (curLine * 10) + 5;
     tgi_sprite(&fileSprite);
   }

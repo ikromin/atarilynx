@@ -140,16 +140,17 @@ void processLoop() {
 			WAIT_FOR_INPUT_CHECK
 
 			pDir = &gsDirEntry[ganDirOrder[gnSelectIndex]];
-			if (pDir->bDirectory) {
-				changeToDirectory(pDir->szFilename);
-			}
-			else {
+			switch (pDir->bDirectory) {
+			case 0:
 				launchSelectedROM();
+				break;
+			case 1:
+				changeToDirectory(pDir->szFilename);
+				break;
 			}
 		}
 		else if (BJOY_B) {
 			WAIT_FOR_INPUT_CHECK
-
 			changeToDirectory(".");
 		}
 
