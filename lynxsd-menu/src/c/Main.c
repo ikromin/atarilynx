@@ -9,16 +9,6 @@
 
 static u8 waitingForInput = 0;
 static u8 dirListLoaded = 0;
-static u8 prefsShowing = 0;
-static u8 preferences[256] = { 1, 0 };
-
-static char* prefNames[NUM_PREFS] = {
-	"BOOT HELP ON",
-	"AUTO RUN ROM"
-	//"FAST SCROLL"
-	//"LONG NAMES"
-	//"ROM PREVIEW"
-};
 
 extern u8 joystickActionDelay;
 
@@ -100,26 +90,6 @@ void launchSelectedROM() {
 
 
 /**
- * Saves the current preferences state to memory and to file.
- */
-static void savePreferences() {
-	u8 idx;
-
-	for (idx = 0; idx < NUM_PREFS; idx++) {
-		// 2 is the offset of the 'yes' preferences in the fileTypesMap
-		preferences[idx] = (&gsDirEntry[idx])->bDirectory - 2;
-	}
-
-	if (LynxSD_OpenFile(FILE_PREFS) == FR_OK) {
-		LynxSD_WriteFile(preferences, 256);
-		LynxSD_CloseFile();
-	}
-
-	prefsShowing = 0;
-}
-
-
-/**
  * Changes current directory to the given directory
  */
 static void changeToDirectory(char dirName[]) {
@@ -134,7 +104,7 @@ static void changeToDirectory(char dirName[]) {
 
 		// save preferences if they are showing before going back to directory list
 		if (prefsShowing) {
-			savePreferences();
+			PREFS_save();
 		}
 
 		// scan backwards through the current directory name setting characters to 0
@@ -160,31 +130,6 @@ static void changeToDirectory(char dirName[]) {
 
 	gnSelectIndex = 0;
 	dirListLoaded = 0;
-}
-
-
-/**
- * Displays the list of preferences based on the preference names array.
- * Preferences are simulated using directory/file entries with bDirectory
- * set to the index into the fileTypesMap from UI.c.
- */
-static void showPreferences() {
-	SDirEntry *prefsPtr;
-	u8 idx;
-
-	prefsShowing = 1;
-	UI_forwardAction();
-
-	gnSelectIndex = 0;
-	gnNumDirEntries = NUM_PREFS;
-	strcpy(gszCurrentDir, "** PREFERENCES **");
-	
-	for (idx = 0; idx < NUM_PREFS; idx++) {
-		prefsPtr = &gsDirEntry[idx];
-		strcpy(prefsPtr->szFilename, prefNames[idx]);
-		prefsPtr->bDirectory = preferences[idx] + 2;
-		ganDirOrder[idx] = idx;
-	}
 }
 
 
@@ -242,7 +187,7 @@ void processLoop() {
 					tgi_flip();
 					break;
 				case '1':
-					showPreferences();
+					PREFS_show();
 					break;
 				case '2':
 					waitingForInput = 1;
@@ -294,11 +239,7 @@ void main(void)
 	UI_init();
 	LynxSD_Init();
 
-	// read in preferences
-	if (LynxSD_OpenFile(FILE_PREFS) == FR_OK) {
-		LynxSD_ReadFile(preferences, 256);
-		LynxSD_CloseFile();
-	}
+	PREFS_load();
 
 	// try to run the last loaded ROM, if it fails load directory contents
 	// and start the input processing loop
