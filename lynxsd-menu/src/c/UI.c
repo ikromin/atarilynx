@@ -24,36 +24,6 @@
 extern u8 joystickActionDelay;
 extern char gszCurrentDir[256];
 
-// sprite references
-extern char menu[];
-extern char rom[];
-extern char dir[];
-extern char loading[];
-extern char help[];
-extern char fail[];
-
-SCB_REHV_PAL menuSprite =  {
-	BPP_4 | TYPE_NORMAL,
-	REHV, 0x0, 0x0, &menu[0],
-  0, 0,
-	0x0100, 0x0100,
-	{0x01,0x23,0x45,0x67,0x89,0xAB,0xCD,0xEF}
-};
-
-SCB_REHV_PAL genericSprite =  {
-	BPP_4 | TYPE_NORMAL,
-	REHV, 0x0, 0x0, &loading[0],
-  0, 0,
-	0x0100, 0x0100,
-	{0x01,0x23,0x45,0x67,0x89,0xAB,0xCD,0xEF}
-};
-
-SCB_REHV_PAL fileSprite =  {
-	BPP_4 | TYPE_NORMAL,
-	REHV, 0x0, 0x0, &rom[0],
-  134, 0,
-	0x0100, 0x0100,
-	{0x01,0x23,0x45,0x67,0x89,0xAB,0xCD,0xEF}
 };
 
 // pallete colours in 0x0GBR format, 4 rows of 4 colours each
@@ -77,21 +47,49 @@ static unsigned char currentUiLine = 0;
 
 
 /**
+ * Draws the top and bottom 'thick' borders.
+ */
+static void drawBorders() {
+  SCB_REHV_PAL* spritePtr;
+
+  spritePtr = &borderSprite;
+  spritePtr->sprctl0 = BPP_3 | TYPE_NORMAL;
+  spritePtr->vpos = 0;
+  tgi_sprite(spritePtr);
+
+  spritePtr = &borderSprite;
+  spritePtr->sprctl0 = BPP_3 | TYPE_NORMAL | VFLIP;
+  spritePtr->vpos = 101;
+  tgi_sprite(spritePtr);
+}
+
+
+static void drawLoadingScreen(char topLine[], char bottomLine[]) {
+  SCB_REHV_PAL* spritePtr;
+
+  drawBorders();
+
+  spritePtr = &genericSprite;
+  spritePtr->data = &img_loading[0];
+  spritePtr->vpos = 26;
+  spritePtr->hpos = 26;
+  tgi_sprite(spritePtr);
+
+  tgi_setcolor(4);
+  TGI_CENTER_ECHO(1, topLine);
+  TGI_CENTER_ECHO(93, bottomLine);
+}
+
+
+/**
  * Screen to display when a previous ROM is being loaded on startup. 
  **/
 void UI_showLastRomScreen(char romFileName[]) {
   WAIT_TGI
-
   tgi_clear();
-  
-  (&genericSprite)->data = &loading[0];
-  tgi_sprite(&genericSprite);
-  
-  tgi_setcolor(4);
-  TGI_CENTER_ECHO(1, TXT_LASTROM);
-  TGI_CENTER_ECHO(93, romFileName);
 
-  tgi_updatedisplay();
+  drawLoadingScreen(TXT_LASTROM, romFileName);
+	tgi_updatedisplay();
 }
 
 /**
@@ -99,18 +97,71 @@ void UI_showLastRomScreen(char romFileName[]) {
  */
 void UI_showLoadingScreen() {
   WAIT_TGI
-
   tgi_clear();
 
-  (&genericSprite)->data = &loading[0];
-  tgi_sprite(&genericSprite);
-
-  tgi_setcolor(4);
-  TGI_CENTER_ECHO(1, TXT_LOADING);
-  TGI_CENTER_ECHO(93, TXT_STANDBY);
-
+  drawLoadingScreen(TXT_LOADING, TXT_STANDBY);
 	tgi_updatedisplay();
 }
+
+
+/**
+ * Screen to display when a ROM file is being programmed into the cart.
+ */
+void UI_showProgrammingScreen() {
+  SDirEntry* dirEntry = &gsDirEntry[ganDirOrder[gnSelectIndex]];
+
+  WAIT_TGI
+  tgi_clear();
+
+  drawLoadingScreen(TXT_PROGRAMMING, dirEntry->szFilename);
+  tgi_updatedisplay();
+}
+
+
+/**
+ * Screen to display during an error condition.
+ */
+void UI_showFailScreen() {
+  SCB_REHV_PAL* spritePtr;
+  SDirEntry* dirEntry = &gsDirEntry[ganDirOrder[gnSelectIndex]];
+
+  WAIT_TGI
+  tgi_clear();
+
+  drawBorders();
+
+  spritePtr = &genericSprite;
+  spritePtr->data = &img_fail[0];
+  spritePtr->vpos = 26;
+  spritePtr->hpos = 26;
+  tgi_sprite(spritePtr);
+
+  tgi_setcolor(4);
+  TGI_CENTER_ECHO(1, TXT_FAIL_LOAD);
+  TGI_CENTER_ECHO(93, dirEntry->szFilename);
+
+  tgi_updatedisplay();
+}
+
+
+/**
+ * Screen to show when the Opt2 button is pressed for help.
+ */
+void UI_showHelpScreen() {
+  SCB_REHV_PAL* spritePtr;
+
+  WAIT_TGI
+  tgi_clear();
+  
+  spritePtr = &genericSprite;
+  spritePtr->data = &img_help[0];
+  spritePtr->vpos = 0;
+  spritePtr->hpos = 0;
+  tgi_sprite(&genericSprite);
+  
+  tgi_updatedisplay();
+}
+
 
 /**
  * Sets up initial palletes by creating an all black colour pallete and copying
@@ -214,61 +265,10 @@ void UI_render() {
   }
 
   // display current directory
-  if (strlen(gszCurrentDir) == 0) {
-    tgi_outtextxy(23, 89, TXT_ROOT_DIR);
-  }
-  else {
-    tgi_outtextxy(23, 89, gszCurrentDir);
-  }
+  tgi_outtextxy(6, 89, (gszCurrentDir[0] == 0 ? TXT_ROOT_DIR : gszCurrentDir));
 
   tgi_setcolor(1);
   tgi_bar(153, 5 + scrollPos, 154, 9 + scrollPos); // scrollbar indicator
 
 	tgi_updatedisplay();
-}
-
-void UI_showProgrammingScreen() {
-  SDirEntry* dirEntry = &gsDirEntry[ganDirOrder[gnSelectIndex]];
-
-  WAIT_TGI
-
-  tgi_clear();
-
-  (&genericSprite)->data = &loading[0];
-  tgi_sprite(&genericSprite);
-  
-  tgi_setcolor(4);
-  TGI_CENTER_ECHO(1, TXT_PROGRAMMING);
-  TGI_CENTER_ECHO(93, dirEntry->szFilename);
-
-  tgi_updatedisplay();
-}
-
-void UI_showFailScreen() {
-  SDirEntry* dirEntry = &gsDirEntry[ganDirOrder[gnSelectIndex]];
-
-  WAIT_TGI
-
-  tgi_clear();
-
-  (&genericSprite)->data = &fail[0];
-  tgi_sprite(&genericSprite);
-
-  tgi_setcolor(4);
-  TGI_CENTER_ECHO(1, TXT_FAIL_LOAD);
-  TGI_CENTER_ECHO(93, dirEntry->szFilename);
-	
-  tgi_updatedisplay();
-}
-
-
-void UI_showHelpScreen() {
-  WAIT_TGI
-
-  tgi_clear();
-  
-  (&genericSprite)->data = &help[0];
-  tgi_sprite(&genericSprite);
-
-  tgi_updatedisplay();
 }
