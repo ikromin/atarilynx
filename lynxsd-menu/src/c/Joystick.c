@@ -1,5 +1,6 @@
 #include <joystick.h>
 #include "Joystick.h"
+#include "Preferences.h"
 
 /*
  ******************************************************************************
@@ -23,7 +24,7 @@ unsigned char __fastcall__ Joy_IsOn(unsigned char mask) {
 	// delay processing if the previous action countdown hasn't expired
 	// this works more or less like a key debouncer
 	if (joystickActionDelay == 0) {
-		joystickActionDelay = ACTION_DELAY_FRAMES;
+		joystickActionDelay = (preferences[PREF_FAST_SCROLL] ? ACTION_DELAY_FRAMES_FAST : ACTION_DELAY_FRAMES_SLOW);
 		return 1;
 	}
 	return 0;

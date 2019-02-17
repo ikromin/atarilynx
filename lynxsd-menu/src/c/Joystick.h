@@ -11,7 +11,8 @@
 #define BJOY_A Joy_IsOn(JOY_BTN_1_MASK)
 #define BJOY_B Joy_IsOn(JOY_BTN_2_MASK)
 
-#define ACTION_DELAY_FRAMES 4
+#define ACTION_DELAY_FRAMES_FAST 5
+#define ACTION_DELAY_FRAMES_SLOW 10
 
 extern u8 joystickActionDelay;
 
