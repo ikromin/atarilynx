@@ -25,7 +25,7 @@ extern u8 joystickActionDelay;
 extern char gszCurrentDir[256];
 
 static char* fileTypesMap[] = {
-  &img_rom[0], &img_dir[0], &img_yes[0], &img_no[0]
+  &img_rom[0], &img_dir[0], &img_no[0], &img_yes[0]
 };
 
 // pallete colours in 0x0GBR format, 4 rows of 4 colours each

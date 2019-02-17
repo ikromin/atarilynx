@@ -7,33 +7,48 @@
  */
 
 
-#define FILE_LAST_ROM "menu/lastrom"
-
 static u8 waitingForInput = 0;
 static u8 dirListLoaded = 0;
+static u8 prefsShowing = 0;
+static u8 preferences[256] = { 1, 0 };
+
+static char* prefNames[NUM_PREFS] = {
+	"BOOT HELP ON",
+	"AUTO RUN ROM"
+	//"FAST SCROLL"
+	//"LONG NAMES"
+	//"ROM PREVIEW"
+};
 
 extern u8 joystickActionDelay;
 
 
 /**
- * If the A button is held down will attempt to launch the last loaded ROM
+ * Launches the last loaded ROM if the toggle is active. Toggle is
+ * based on the preferences option 'AUTO RUN ROM'. The 'B' button is used
+ * to toggle it i.e. if the preference is yes and B is held down, it's
+ * switched to no, and vise-versa.
  */
 static unsigned char runLastROM() {
 	char romFileName[256];
+	u8 joyTriggered = (joy_read(JOY_1) & JOY_BTN_2_MASK) != 0;
 
-	if (JOY_BTN_1(joy_read(JOY_1)))
+	if (preferences[PREF_AUTO_RUN_ROM] ^ joyTriggered)
 	{
-		if (LynxSD_OpenFile(FILE_LAST_ROM) == FR_OK)
-		{
+		if (LynxSD_OpenFile(FILE_LAST_ROM) == FR_OK) {
 			LynxSD_ReadFile(romFileName, 256);
 			LynxSD_CloseFile();
 
 			UI_showLastRomScreen(romFileName);
 						
-			if (LynxSD_Program(romFileName) == FR_OK)
-			{
+			if (LynxSD_Program(romFileName) == FR_OK) {
 				UI_clear();
 				LaunchROM();
+				return 1;
+			}
+			else {
+				waitingForInput = 1;
+				UI_showFailScreen();
 				return 1;
 			}
 		}
@@ -85,6 +100,26 @@ void launchSelectedROM() {
 
 
 /**
+ * Saves the current preferences state to memory and to file.
+ */
+static void savePreferences() {
+	u8 idx;
+
+	for (idx = 0; idx < NUM_PREFS; idx++) {
+		// 2 is the offset of the 'yes' preferences in the fileTypesMap
+		preferences[idx] = (&gsDirEntry[idx])->bDirectory - 2;
+	}
+
+	if (LynxSD_OpenFile(FILE_PREFS) == FR_OK) {
+		LynxSD_WriteFile(preferences, 256);
+		LynxSD_CloseFile();
+	}
+
+	prefsShowing = 0;
+}
+
+
+/**
  * Changes current directory to the given directory
  */
 static void changeToDirectory(char dirName[]) {
@@ -95,6 +130,11 @@ static void changeToDirectory(char dirName[]) {
 		// nothing to go back to if current directory is null
 		if (gszCurrentDir[0] == 0) {
 			return;
+		}
+
+		// save preferences if they are showing before going back to directory list
+		if (prefsShowing) {
+			savePreferences();
 		}
 
 		// scan backwards through the current directory name setting characters to 0
@@ -123,6 +163,31 @@ static void changeToDirectory(char dirName[]) {
 }
 
 
+/**
+ * Displays the list of preferences based on the preference names array.
+ * Preferences are simulated using directory/file entries with bDirectory
+ * set to the index into the fileTypesMap from UI.c.
+ */
+static void showPreferences() {
+	SDirEntry *prefsPtr;
+	u8 idx;
+
+	prefsShowing = 1;
+	UI_forwardAction();
+
+	gnSelectIndex = 0;
+	gnNumDirEntries = NUM_PREFS;
+	strcpy(gszCurrentDir, "** PREFERENCES **");
+	
+	for (idx = 0; idx < NUM_PREFS; idx++) {
+		prefsPtr = &gsDirEntry[idx];
+		strcpy(prefsPtr->szFilename, prefNames[idx]);
+		prefsPtr->bDirectory = preferences[idx] + 2;
+		ganDirOrder[idx] = idx;
+	}
+}
+
+
 #define WAIT_FOR_INPUT_CHECK if (waitingForInput) { waitingForInput = 0; continue; }
 
 
@@ -147,6 +212,12 @@ void processLoop() {
 			case 1:
 				changeToDirectory(pDir->szFilename);
 				break;
+			case 2:
+				pDir->bDirectory = 3;
+				break;
+			case 3:
+				pDir->bDirectory = 2;
+				break;
 			}
 		}
 		else if (BJOY_B) {
@@ -170,7 +241,9 @@ void processLoop() {
 				case 'F':
 					tgi_flip();
 					break;
-
+				case '1':
+					showPreferences();
+					break;
 				case '2':
 					waitingForInput = 1;
 					UI_showHelpScreen();
@@ -221,12 +294,20 @@ void main(void)
 	UI_init();
 	LynxSD_Init();
 
+	// read in preferences
+	if (LynxSD_OpenFile(FILE_PREFS) == FR_OK) {
+		LynxSD_ReadFile(preferences, 256);
+		LynxSD_CloseFile();
+	}
+
 	// try to run the last loaded ROM, if it fails load directory contents
 	// and start the input processing loop
 	if (!runLastROM()) {
-		// show help screen on startup
-		waitingForInput = 1;
-		UI_showHelpScreen();
+		// show help screen on startup unless disabled in preferences
+		if (preferences[PREF_BOOT_HELP]) {
+			waitingForInput = 1;
+			UI_showHelpScreen();
+		}
 
 		processLoop();
 	}
