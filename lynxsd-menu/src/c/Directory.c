@@ -62,7 +62,10 @@ static void __fastcall__ AddDirEntry(const char *pIn, u8 bIsDir)
 }
 
 
-void __fastcall__ ReadDirectory(const char *pDir)
+/**
+ * Reads a directory and stores results in the gsDirEntry array.
+ */
+void __fastcall__ DIR_read(const char *pDir)
 {
 	SFileInfo sInfo;
 	const char *pExt;
@@ -101,4 +104,26 @@ void __fastcall__ ReadDirectory(const char *pDir)
 			}
 		}
 	}
+}
+
+
+/**
+ * Checks whether a given ROM file path is valid
+ */
+u8 __fastcall__ DIR_IsValidRomPath(const char romFile[]) {
+	if ((strlen(gszCurrentDir) + strlen(romFile) + 2) <= 255) {
+		return 1;
+	}
+	return 0;
+}
+
+
+/**
+ * Creates the full path to a ROM file based on the current directory
+ * and the given ROM file name.
+ */
+void __fastcall__ DIR_FullRomPath(char buf[], const char romFile[]) {
+	strcpy(buf, gszCurrentDir);
+	if (buf[0]) strcat(buf, "/");
+	strcat(buf, romFile);
 }

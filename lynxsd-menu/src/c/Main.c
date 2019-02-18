@@ -55,10 +55,8 @@ void launchSelectedROM() {
 	SDirEntry *pDir = &gsDirEntry[ganDirOrder[gnSelectIndex]];
 	char romFile[256];
 
-	if ((strlen(gszCurrentDir) + strlen(pDir->szFilename) + 2) <= 255) {
-		strcpy(romFile, gszCurrentDir);
-		if (romFile[0]) strcat(romFile, "/");
-		strcat(romFile, pDir->szFilename);
+	if (DIR_IsValidRomPath(pDir->szFilename)) {
+		DIR_FullRomPath(romFile, pDir->szFilename);
 
 		UI_showProgrammingScreen();
 
