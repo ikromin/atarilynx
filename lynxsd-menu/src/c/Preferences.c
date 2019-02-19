@@ -12,15 +12,14 @@
 #define FILE_PREFS "menu/prefs"
 #define NUM_PREFS 3
 
-u8 preferences[256] = { 1, 0 }; // default preferences
+u8 preferences[256] = { 1, 0, 1 }; // default preferences
 u8 prefsShowing = 0;
 
 static char* prefNames[NUM_PREFS] = {
 	"BOOT HELP ON",
 	"AUTO RUN ROM",
-	"FAST SCROLL"
-	//"LONG NAMES"
-	//"ROM PREVIEW"
+	"FAST SCROLL",
+  //"LONG NAMES"
 };
 
 

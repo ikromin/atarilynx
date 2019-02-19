@@ -17,6 +17,9 @@ extern char img_help[];
 extern char img_fail[];
 extern char img_border[];
 
+// holds preview data that is loaded from SD card
+char img_preview[8365];
+
 // thick top/bottom border
 SCB_REHV_PAL borderSprite = {
 	BPP_3 | TYPE_NORMAL, REHV, 0x0,
@@ -80,6 +83,15 @@ SCB_REHV_PAL menuSprite = {
   (char*) &menuSprite2, &img_menublr[0],
   0, 1,
 	0x0100, 0x0100,
+	{0x01,0x23,0x45,0x67,0x89,0xAB,0xCD,0xEF}
+};
+
+// used to show ROM previews from LSD files
+SCB_REHV_PAL previewSprite = {
+	BPP_4 | TYPE_NONCOLL, LITERAL | REHV, 0x0,
+  0x0, &img_preview[0],
+  0, 0,
+	0x100, 0x100,
 	{0x01,0x23,0x45,0x67,0x89,0xAB,0xCD,0xEF}
 };
 

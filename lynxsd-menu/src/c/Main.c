@@ -7,7 +7,8 @@
  */
 
 
-static u8 waitingForInput = 0;
+static u8 waitingForAction = 0;
+static u8 resetPalette = 0;
 static u8 dirListLoaded = 0;
 
 extern u8 joystickActionDelay;
@@ -37,8 +38,8 @@ static unsigned char runLastROM() {
 				return 1;
 			}
 			else {
-				waitingForInput = 1;
-				UI_showFailScreen();
+				waitingForAction = 1;
+				UI_showFailScreen(0);
 				return 1;
 			}
 		}
@@ -76,13 +77,13 @@ void launchSelectedROM() {
 			LaunchROM();
 		}
 		else {
-			waitingForInput = 1;
-			UI_showFailScreen();
+			waitingForAction = 1;
+			UI_showFailScreen(0);
 		}
 	}
 	else {
-		waitingForInput = 1;
-		UI_showFailScreen();
+		waitingForAction = 1;
+		UI_showFailScreen(0);
 	}
 }
 
@@ -118,8 +119,6 @@ static void changeToDirectory(char dirName[]) {
 	}
 	// or go forward a directory by name
 	else {
-		UI_showLoadingScreen();
-
 		if (gszCurrentDir[0]) strcat(gszCurrentDir, "/");
 		strcat(gszCurrentDir, dirName);
 
@@ -131,7 +130,7 @@ static void changeToDirectory(char dirName[]) {
 }
 
 
-#define WAIT_FOR_INPUT_CHECK if (waitingForInput) { waitingForInput = 0; continue; }
+#define WAIT_FOR_ACTION_CHECK if (waitingForAction) { waitingForAction = 0; continue; }
 
 
 /**
@@ -145,7 +144,7 @@ void processLoop() {
 		
 		// process joystick buttons
 		if (BJOY_A) {
-			WAIT_FOR_INPUT_CHECK
+			WAIT_FOR_ACTION_CHECK
 
 			pDir = &gsDirEntry[ganDirOrder[gnSelectIndex]];
 			switch (pDir->bDirectory) {
@@ -164,12 +163,13 @@ void processLoop() {
 			}
 		}
 		else if (BJOY_B) {
-			WAIT_FOR_INPUT_CHECK
+			WAIT_FOR_ACTION_CHECK
 			changeToDirectory(".");
 		}
 
 		// nothing else to do if waiting for inputs
-		if (waitingForInput == 1) continue;
+		if (waitingForAction == 1) continue;
+		if (resetPalette == 1) UI_resetPalette();
 
 		// process joystick d-pad
 		if (BJOY_UP) UI_selectPrevious();
@@ -184,11 +184,15 @@ void processLoop() {
 				case 'F':
 					tgi_flip();
 					break;
+				case 'P':
+					waitingForAction = UI_showPreviewScreen();
+					if (waitingForAction) resetPalette = 1;
+					break;
 				case '1':
 					PREFS_show();
 					break;
 				case '2':
-					waitingForInput = 1;
+					waitingForAction = 1;
 					UI_showHelpScreen();
 					break;
 			}
@@ -196,8 +200,8 @@ void processLoop() {
 
 		// read in directory contents if required
 		if (dirListLoaded == 0) {
-			UI_showLoadingScreen();
-			ReadDirectory(gszCurrentDir);
+			UI_showLoadingDirScreen();
+			DIR_read(gszCurrentDir);
 			dirListLoaded = 1;
 		}
 		
@@ -244,7 +248,7 @@ void main(void)
 	if (!runLastROM()) {
 		// show help screen on startup unless disabled in preferences
 		if (preferences[PREF_BOOT_HELP]) {
-			waitingForInput = 1;
+			waitingForAction = 1;
 			UI_showHelpScreen();
 		}
 

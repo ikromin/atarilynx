@@ -13,9 +13,11 @@
 
 #define TXT_LASTROM "Loading last ROM..."
 #define TXT_STANDBY "Please stand by"
-#define TXT_LOADING "Loading ROM list..."
+#define TXT_LOADING_DIR "Loading ROM list..."
+#define TXT_LOADING "Loading..."
+#define TXT_LOADING_PREVIEW "Loading preview..."
 #define TXT_PROGRAMMING "Loading ROM..."
-#define TXT_FAIL_LOAD "Failed to load ROM"
+#define TXT_FAIL_LOAD "Error loading!"
 #define TXT_ROOT_DIR "/"
 
 #define WAIT_TGI while (tgi_busy());
@@ -29,7 +31,7 @@ static char* fileTypesMap[] = {
 };
 
 // pallete colours in 0x0GBR format, 4 rows of 4 colours each
-unsigned char masterpal[] = {
+unsigned char masterPal[] = {
   // green values
   0x0000 >> 8,    0x030b >> 8,    0x0333 >> 8,    0x0444 >> 8,
   0x0999 >> 8,    0x0115 >> 8,    0x0aaa >> 8,    0x0aaa >> 8,
@@ -42,8 +44,8 @@ unsigned char masterpal[] = {
   0x0aaa & 0xff,  0x0aaa & 0xff,  0x0aaa & 0xff,  0x0aaa & 0xff
 };
 
-static unsigned char blackpal[16];
-static unsigned char currentpal[16];
+static unsigned char blackPal[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+static unsigned char previewPal[16];
 
 static unsigned char currentUiLine = 0;
 
@@ -66,6 +68,9 @@ static void drawBorders() {
 }
 
 
+/**
+ * Draws the loading screen with a top and bottom centered text.
+ */
 static void drawLoadingScreen(char topLine[], char bottomLine[]) {
   SCB_REHV_PAL* spritePtr;
 
@@ -94,15 +99,68 @@ void UI_showLastRomScreen(char romFileName[]) {
 	tgi_updatedisplay();
 }
 
+
 /**
  * Screen to display when the ROM list is loading.
  */
-void UI_showLoadingScreen() {
+void UI_showLoadingDirScreen() {
   WAIT_TGI
   tgi_clear();
 
-  drawLoadingScreen(TXT_LOADING, TXT_STANDBY);
+  drawLoadingScreen(TXT_LOADING_DIR, TXT_STANDBY);
 	tgi_updatedisplay();
+}
+
+
+/**
+ * Screen to display when a ROM preview is selected. Will first
+ * show a loading screen and then if the LSD preview file exists it
+ * will be shown, otherwise an error screen will be shown.
+ */
+u8 UI_showPreviewScreen() {
+  SDirEntry* dirEntry = &gsDirEntry[ganDirOrder[gnSelectIndex]];
+  char previewFile[256];
+  char* i;
+  u8 fail = 1;
+
+  // previews can only be shown for file type entries
+  if (dirEntry->bDirectory != 0) {
+    return 0;
+  }
+  
+  WAIT_TGI
+  tgi_clear();
+
+  drawLoadingScreen(TXT_LOADING_PREVIEW, dirEntry->szFilename);
+	tgi_updatedisplay();
+
+  // LSD file name is the ROM file name with its extension set to LSD
+  DIR_FullRomPath(previewFile, dirEntry->szFilename);
+  i = strrchr(previewFile, '.');
+  if (i) strcpy(i + 1, "LSD");
+
+	if (LynxSD_OpenFile(previewFile) == FR_OK) {
+		if (LynxSD_ReadFile(img_preview, 8365) == FR_OK) {
+			if (LynxSD_ReadFile(previewPal, 32) == FR_OK) {
+        fail = 0;
+			}
+		}
+		LynxSD_CloseFile();
+	}
+
+  if (fail) {
+    tgi_setpalette(masterPal);
+    UI_showFailScreen(previewFile);
+  }
+  else {
+    WAIT_TGI
+    tgi_clear();
+    tgi_setpalette(previewPal);
+    tgi_sprite(&previewSprite);
+    tgi_updatedisplay();
+  }
+
+  return 1;
 }
 
 
@@ -123,7 +181,7 @@ void UI_showProgrammingScreen() {
 /**
  * Screen to display during an error condition.
  */
-void UI_showFailScreen() {
+void UI_showFailScreen(char* fileName) {
   SCB_REHV_PAL* spritePtr;
   SDirEntry* dirEntry = &gsDirEntry[ganDirOrder[gnSelectIndex]];
 
@@ -140,7 +198,7 @@ void UI_showFailScreen() {
 
   tgi_setcolor(4);
   TGI_CENTER_ECHO(1, TXT_FAIL_LOAD);
-  TGI_CENTER_ECHO(93, dirEntry->szFilename);
+  TGI_CENTER_ECHO(93, fileName == 0 ? dirEntry->szFilename : fileName);
 
   tgi_updatedisplay();
 }
@@ -166,17 +224,10 @@ void UI_showHelpScreen() {
 
 
 /**
- * Sets up initial palletes by creating an all black colour pallete and copying
- * the master pallete into the current pallete.
+ * Sets up the palette and background colour and clears the display.
  */
 void UI_init() {
-  unsigned char i = 0;
-  for (i = 0; i < 16; i++) {
-    blackpal[i] = 0x00;
-    currentpal[i] = masterpal[i];
-  }
-
-  tgi_setpalette(masterpal);
+  tgi_setpalette(masterPal);
 	tgi_setbgcolor(0);
 
   tgi_clear();
@@ -184,9 +235,20 @@ void UI_init() {
 }
 
 
+/**
+ * Sets the palette to all black and clears the display.
+ */
 void UI_clear() {
-	tgi_setpalette(blackpal);
+	tgi_setpalette(blackPal);
 	tgi_clear();
+}
+
+
+/**
+ * Resets the palette to the default.
+ */
+void UI_resetPalette() {
+  tgi_setpalette(masterPal);
 }
 
 

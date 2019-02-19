@@ -16,8 +16,10 @@ Version 2.0 Atari Gamer
  * Scrollbar showing location of selected file in the overall list
  * Moving back a directory is done with the B button
 * Load last ROM feature optimised to start a little faster
+  * Toggled by holding down B on boot
 * Help screen shown on startup (controlled by preference option)
 * Load last ROM can be set to automatic in preferences
+* ROM preview image is loaded by pressing the Pause button
 
 Below is the original Change Log from the original sources. This information has now been removed from all source files and will be maintained here instead.
 
