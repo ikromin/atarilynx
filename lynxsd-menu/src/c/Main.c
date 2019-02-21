@@ -20,7 +20,7 @@ extern u8 joystickActionDelay;
  * to toggle it i.e. if the preference is yes and B is held down, it's
  * switched to no, and vise-versa.
  */
-static unsigned char runLastROM() {
+static u8 runLastROM() {
 	char romFileName[256];
 	u8 joyTriggered = (joy_read(JOY_1) & JOY_BTN_2_MASK) != 0;
 
@@ -216,8 +216,8 @@ void processLoop() {
 
 void lynxInit() {
 	// clear hardware pallete to start with a blank screen
-	unsigned char* ptr = (unsigned char*) 0xfda0;
-	unsigned char count = 0x20;
+	u8* ptr = (u8*) 0xfda0;
+	u8 count = 0x20;
 	while (count--) {
 		*ptr++ = 0;
 	}
@@ -234,8 +234,7 @@ void lynxInit() {
 }
 
 
-void main(void) 
-{
+void main() {
 	// initialise the Lynx, UI and SD cart
 	lynxInit();
 	UI_init();

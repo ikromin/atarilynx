@@ -6,11 +6,11 @@
 #define MAX_UI_LINES 7
 
 void UI_init();
-void UI_showLastRomScreen(char romFileName[]);
+void __fastcall__ UI_showLastRomScreen(char romFileName[]);
+void __fastcall__ UI_showFailScreen(char* fileName);
 void UI_showLoadingDirScreen();
 u8 UI_showPreviewScreen();
 void UI_showProgrammingScreen();
-void UI_showFailScreen(char* fileName);
 void UI_showHelpScreen();
 
 void UI_clear();

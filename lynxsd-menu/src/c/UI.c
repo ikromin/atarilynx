@@ -31,7 +31,7 @@ static char* fileTypesMap[] = {
 };
 
 // pallete colours in 0x0GBR format, 4 rows of 4 colours each
-unsigned char masterPal[] = {
+u8 masterPal[] = {
   // green values
   0x0000 >> 8,    0x030b >> 8,    0x0333 >> 8,    0x0444 >> 8,
   0x0999 >> 8,    0x0115 >> 8,    0x0aaa >> 8,    0x0aaa >> 8,
@@ -44,10 +44,10 @@ unsigned char masterPal[] = {
   0x0aaa & 0xff,  0x0aaa & 0xff,  0x0aaa & 0xff,  0x0aaa & 0xff
 };
 
-static unsigned char blackPal[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-static unsigned char previewPal[16];
+static u8 blackPal[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+static u8 previewPal[16];
 
-static unsigned char currentUiLine = 0;
+static u8 currentUiLine = 0;
 
 
 /**
@@ -91,7 +91,7 @@ static void drawLoadingScreen(char topLine[], char bottomLine[]) {
 /**
  * Screen to display when a previous ROM is being loaded on startup. 
  **/
-void UI_showLastRomScreen(char romFileName[]) {
+void __fastcall__ UI_showLastRomScreen(char romFileName[]) {
   WAIT_TGI
   tgi_clear();
 
@@ -181,7 +181,7 @@ void UI_showProgrammingScreen() {
 /**
  * Screen to display during an error condition.
  */
-void UI_showFailScreen(char* fileName) {
+void __fastcall__ UI_showFailScreen(char* fileName) {
   SCB_REHV_PAL* spritePtr;
   SDirEntry* dirEntry = &gsDirEntry[ganDirOrder[gnSelectIndex]];
 

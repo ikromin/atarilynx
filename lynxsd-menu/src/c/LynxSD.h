@@ -1,16 +1,7 @@
 #ifndef __LYNX_SD__
 #define __LYNX_SD__
 
-typedef signed char s8;
-typedef unsigned char u8;
-typedef unsigned short u16;
-typedef unsigned long u32;
-
-typedef struct
-{
-	char	szFilename[13];
-	u8		bDirectory;
-} SDirEntry;
+#include "Types.h"
 
 typedef enum {
 	FR_OK = 0,			/* 0 */

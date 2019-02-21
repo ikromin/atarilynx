@@ -1,7 +1,7 @@
 #ifndef __LYNX_SD_JOYSTICK__
 #define __LYNX_SD_JOYSTICK__
 
-#include "LynxSD.h"
+#include "Types.h"
 
 // macros for joystick states
 #define BJOY_UP Joy_IsOn(JOY_UP_MASK)

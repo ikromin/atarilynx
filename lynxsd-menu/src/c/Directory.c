@@ -1,5 +1,4 @@
 #include <string.h>
-#include "LynxSD.h"
 #include "Directory.h"
 
 /*

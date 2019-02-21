@@ -7,7 +7,6 @@
 #include <conio.h>
 #include <string.h>
 
-#include "LynxSD.h"
 #include "Joystick.h"
 #include "UI.h"
 #include "Program.h"
