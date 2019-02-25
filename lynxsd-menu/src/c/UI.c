@@ -1,5 +1,6 @@
 #include <tgi.h>
 #include <string.h>
+#include <stdlib.h>
 #include "UI.h"
 #include "Directory.h"
 #include "Sprites.h"
@@ -264,12 +265,10 @@ void UI_selectNext() {
 
 
 void UI_selectPrevious2() {
-  u8 validFirstLine = gnSelectIndex % MAX_UI_LINES;
-  
   if (gnSelectIndex < MAX_UI_LINES) gnSelectIndex = 0;
 	else gnSelectIndex -= MAX_UI_LINES;
   
-  if (currentUiLine > gnSelectIndex) currentUiLine = validFirstLine;
+  if (currentUiLine > gnSelectIndex) currentUiLine = gnSelectIndex;
 }
 
 
