@@ -8,9 +8,6 @@
  ******************************************************************************
  */
 
-// a count down used to delay reading of joystick events
-// should be decremented in the main game loop
-u8 joystickActionDelay = 0;
 
 static unsigned char joyState = 0;
 
