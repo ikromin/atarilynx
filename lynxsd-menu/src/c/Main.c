@@ -92,7 +92,7 @@ void launchSelectedROM() {
 static void changeToDirectory(char dirName[]) {
 	// go back up a directory
 	if (dirName[0] == '.') {
-		char* dirPtr;
+		u8 dirLen;
 
 		// nothing to go back to if current directory is null
 		if (gszCurrentDir[0] == 0) {
@@ -106,11 +106,12 @@ static void changeToDirectory(char dirName[]) {
 
 		// scan backwards through the current directory name setting characters to 0
 		// until a slash is found or we've reached the start of the directory name
-		dirPtr = gszCurrentDir + strlen(gszCurrentDir);
-		while (--dirPtr >= gszCurrentDir) {
-			if ((*dirPtr == '/') || (dirPtr == gszCurrentDir)) {
-				*dirPtr = 0;
-			}
+		dirLen = strlen(gszCurrentDir);
+		while (dirLen > 0) {
+			char c = gszCurrentDir[dirLen - 1];
+			gszCurrentDir[dirLen - 1] = 0;
+			if (c == '/') break;
+			dirLen--;
 		}
 
 		UI_backAction();
