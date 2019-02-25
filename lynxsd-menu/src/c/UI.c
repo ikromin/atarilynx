@@ -293,7 +293,7 @@ void UI_backAction() {
 }
 
 
-void UI_render() {
+void UI_showDirectory() {
 	SDirEntry* dirEntry;
   u32 scrollPos = (7400 * (u32) gnSelectIndex) / (100 * (u32) (gnNumDirEntries - 1));
   u8 highlightOffset = 10 * currentUiLine;
@@ -319,7 +319,8 @@ void UI_render() {
     // sprite data picked from file type map
     (&fileSprite)->data = fileTypesMap[dirEntry->bDirectory];
 
-    tgi_outtextxy(5, (curLine * 10) + 6, dirEntry->szFilename);
+    // TODO show 16 chars at a time
+    tgi_outtextxy(5, (curLine * 10) + 6, dirEntry->szLongName);
     (&fileSprite)->vpos = (curLine * 10) + 5;
     tgi_sprite(&fileSprite);
   }

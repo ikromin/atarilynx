@@ -128,9 +128,6 @@ static void changeToDirectory(char dirName[]) {
 }
 
 
-#define WAIT_FOR_ACTION_CHECK if (waitingForAction) { waitingForAction = 0; continue; }
-
-
 /**
  *  Main process loop, check for button inputs and performs necessary actions.
  */
@@ -138,36 +135,69 @@ void processLoop() {
 	SDirEntry *pDir;
 
 	while (1) {
+		u8 action = 0;
 		Joy_Buffer();
 		
-		// process joystick buttons
-		if (BJOY_A) {
-			WAIT_FOR_ACTION_CHECK
+		// process buttons input
+		if (BJOY_A) { action = 'A'; }
+		if (BJOY_B) { action = 'B'; }
+		if (kbhit()) { action = cgetc(); }
 
-			pDir = &gsDirEntry[ganDirOrder[gnSelectIndex]];
-			switch (pDir->bDirectory) {
-			case 0:
-				launchSelectedROM();
-				break;
-			case 1:
-				changeToDirectory(pDir->szFilename);
-				break;
-			case 2:
-				pDir->bDirectory = 3;
-				break;
-			case 3:
-				pDir->bDirectory = 2;
-				break;
-			}
-		}
-		else if (BJOY_B) {
-			WAIT_FOR_ACTION_CHECK
-			changeToDirectory(".");
+		// check if we need to wait for action or clear to process actions
+		if (waitingForAction) {
+			if (action) waitingForAction = 0;
+			continue;
 		}
 
-		// nothing else to do if waiting for inputs
-		if (waitingForAction == 1) continue;
-		if (resetPalette == 1) UI_resetPalette();
+		// action any inputs if necessary
+		switch (action) {
+			case 'A':
+				pDir = &gsDirEntry[ganDirOrder[gnSelectIndex]];
+				switch (pDir->bDirectory) {
+					case 0:
+						launchSelectedROM();
+						break;
+					case 1:
+						changeToDirectory(pDir->szFilename);
+						break;
+					case 2:
+						pDir->bDirectory = 3;
+						break;
+					case 3:
+						pDir->bDirectory = 2;
+						break;
+				}
+				break;
+
+			case 'B':
+				changeToDirectory(".");
+				break;
+			
+			case 'F':
+				tgi_flip();
+				break;
+
+			case 'P':
+				waitingForAction = UI_showPreviewScreen();
+				if (waitingForAction) resetPalette = 1;
+				break;
+
+			case '1':
+				PREFS_show();
+				break;
+
+			case '2':
+				waitingForAction = 1;
+				UI_showHelpScreen();
+				break;
+		}
+	
+		// read in directory contents if required
+		if (dirListLoaded == 0) {
+			UI_showLoadingDirScreen();
+			DIR_read(gszCurrentDir);
+			dirListLoaded = 1;
+		}
 
 		// process joystick d-pad
 		if (BJOY_UP) UI_selectPrevious();
@@ -175,39 +205,13 @@ void processLoop() {
 		else if (BJOY_DOWN) UI_selectNext();
 		else if (BJOY_RIGHT) UI_selectNext2();
 
-		// process other buttons
-		if (kbhit()) {
-			char key = cgetc();
-			switch (key) {
-				case 'F':
-					tgi_flip();
-					break;
-				case 'P':
-					waitingForAction = UI_showPreviewScreen();
-					if (waitingForAction) resetPalette = 1;
-					break;
-				case '1':
-					PREFS_show();
-					break;
-				case '2':
-					waitingForAction = 1;
-					UI_showHelpScreen();
-					break;
-			}
-		}
-
-		// read in directory contents if required
-		if (dirListLoaded == 0) {
-			UI_showLoadingDirScreen();
-			DIR_read(gszCurrentDir);
-			dirListLoaded = 1;
-		}
+		// render the file/directory listing and reset palette if required
+		if (resetPalette) UI_resetPalette();
 		
-		// render the file/directory listing unless waiting for input
 		if (!tgi_busy()) {
-			UI_render();
+			UI_showDirectory();
 		}
-	};
+	}
 }
 
 

@@ -24,6 +24,6 @@ void UI_selectNext2();
 void UI_forwardAction();
 void UI_backAction();
 
-void UI_render();
+void UI_showDirectory();
 
 #endif // __LYNX_SD_UI__
