@@ -19,6 +19,7 @@
 #define TXT_LOADING_PREVIEW "Loading preview..."
 #define TXT_PROGRAMMING "Loading ROM..."
 #define TXT_FAIL_LOAD "Error loading!"
+#define TXT_NO_ROMS "** NO ROMS **"
 #define TXT_ROOT_DIR "/"
 
 #define WAIT_TGI while (tgi_busy());
@@ -301,30 +302,37 @@ void UI_showDirectory() {
 	tgi_clear();
   tgi_sprite(&menuSprite);
 
-  // current selection highlight
-  tgi_setcolor(1);
-  tgi_bar(5, highlightOffset + 5, 133, highlightOffset + 13);
+  // draw directory entries if we have any to show
+  if (gnNumDirEntries) {
+    // current selection highlight
+    tgi_setcolor(1);
+    tgi_bar(5, highlightOffset + 5, 133, highlightOffset + 13);
 
-  tgi_setcolor(4);
+    tgi_setcolor(4);
 
-  startIndex = gnSelectIndex - currentUiLine; // start drawing n lines before current line
-  for (curLine = 0; curLine <= MAX_UI_LINES; curLine++) {
-    // work out the current line directory index
-    lineIndex = startIndex + curLine;
-    if (lineIndex >= gnNumDirEntries) break;
+    startIndex = gnSelectIndex - currentUiLine; // start drawing n lines before current line
+    for (curLine = 0; curLine <= MAX_UI_LINES; curLine++) {
+      // work out the current line directory index
+      lineIndex = startIndex + curLine;
+      if (lineIndex >= gnNumDirEntries) break;
 
-    dirEntry = &gsDirEntry[ganDirOrder[lineIndex]];
-  
-    // sprite data picked from file type map
-    (&fileSprite)->data = fileTypesMap[dirEntry->bDirectory];
+      dirEntry = &gsDirEntry[ganDirOrder[lineIndex]];
+    
+      // sprite data picked from file type map
+      (&fileSprite)->data = fileTypesMap[dirEntry->bDirectory];
 
-    // TODO show 16 chars at a time
-    tgi_outtextxy(5, (curLine * 10) + 6, dirEntry->szLongName);
-    (&fileSprite)->vpos = (curLine * 10) + 5;
-    tgi_sprite(&fileSprite);
+      // TODO show 16 chars at a time
+      tgi_outtextxy(5, (curLine * 10) + 6, dirEntry->szLongName);
+      (&fileSprite)->vpos = (curLine * 10) + 5;
+      tgi_sprite(&fileSprite);
+    }
+  }
+  else {
+    tgi_outtextxy(5, 6, TXT_NO_ROMS);
   }
 
   // display current directory
+  tgi_setcolor(4);
   tgi_outtextxy(5, 89, (gszCurrentDir[0] == 0 ? TXT_ROOT_DIR : gszCurrentDir));
 
   tgi_setcolor(1);
