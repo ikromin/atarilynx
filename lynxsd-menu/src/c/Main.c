@@ -11,8 +11,6 @@ static u8 waitingForAction = 0;
 static u8 resetPalette = 0;
 static u8 dirListLoaded = 0;
 
-extern u8 joystickActionDelay;
-
 
 /**
  * Launches the last loaded ROM if the toggle is active. Toggle is
@@ -208,7 +206,6 @@ void processLoop() {
 		// render the file/directory listing unless waiting for input
 		if (!tgi_busy()) {
 			UI_render();
-			if (joystickActionDelay > 0) joystickActionDelay--;
 		}
 	};
 }
