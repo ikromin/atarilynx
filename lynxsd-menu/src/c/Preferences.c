@@ -10,16 +10,16 @@
  */
 
 #define FILE_PREFS "menu/prefs"
-#define NUM_PREFS 3
+#define NUM_PREFS 4
 
-u8 preferences[256] = { 1, 0, 1 }; // default preferences
+u8 preferences[256] = { 1, 0, 1, 1 }; // default preferences
 u8 prefsShowing = 0;
 
 static char* prefNames[NUM_PREFS] = {
 	"BOOT HELP ON",
 	"AUTO RUN ROM",
 	"FAST SCROLL",
-  //"LONG NAMES"
+  "LONG NAMES"
 };
 
 
@@ -68,11 +68,12 @@ void PREFS_show() {
 
 	gnSelectIndex = 0;
 	gnNumDirEntries = NUM_PREFS;
-	strcpy(gszCurrentDir, "** PREFERENCES **");
+	strcpy(gszCurrentDir, TXT_PREFS_DIR);
 	
 	for (idx = 0; idx < NUM_PREFS; idx++) {
 		prefsPtr = &gsDirEntry[idx];
 		strcpy(prefsPtr->szFilename, prefNames[idx]);
+		strcpy(prefsPtr->szLongName, prefNames[idx]);
 		prefsPtr->bDirectory = preferences[idx] + 2;
 		ganDirOrder[idx] = idx;
 	}

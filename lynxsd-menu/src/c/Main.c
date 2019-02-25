@@ -54,8 +54,8 @@ void launchSelectedROM() {
 	SDirEntry *pDir = &gsDirEntry[ganDirOrder[gnSelectIndex]];
 	char romFile[256];
 
-	if (DIR_IsValidRomPath(pDir->szFilename)) {
-		DIR_FullRomPath(romFile, pDir->szFilename);
+	if (DIR_IsValidFilePath(pDir->szFilename)) {
+		DIR_FullFilePath(romFile, pDir->szFilename);
 
 		UI_showProgrammingScreen();
 
@@ -149,6 +149,9 @@ void processLoop() {
 			continue;
 		}
 
+		// reset palette if required
+		if (resetPalette) UI_resetPalette();
+
 		// action any inputs if necessary
 		switch (action) {
 			case 'A':
@@ -204,9 +207,6 @@ void processLoop() {
 		else if (BJOY_LEFT) UI_selectPrevious2();
 		else if (BJOY_DOWN) UI_selectNext();
 		else if (BJOY_RIGHT) UI_selectNext2();
-
-		// render the file/directory listing and reset palette if required
-		if (resetPalette) UI_resetPalette();
 		
 		if (!tgi_busy()) {
 			UI_showDirectory();

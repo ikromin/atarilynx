@@ -135,7 +135,7 @@ u8 UI_showPreviewScreen() {
 	tgi_updatedisplay();
 
   // LSD file name is the ROM file name with its extension set to LSD
-  DIR_FullRomPath(previewFile, dirEntry->szFilename);
+  DIR_FullFilePath(previewFile, dirEntry->szFilename);
   i = strrchr(previewFile, '.');
   if (i) strcpy(i + 1, "LSD");
 

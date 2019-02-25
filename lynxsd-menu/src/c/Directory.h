@@ -6,6 +6,7 @@
 typedef struct {
 	char	szFilename[13];
 	u8		bDirectory;
+	char  szLongName[50];
 } SDirEntry;
 
 
@@ -18,7 +19,7 @@ extern SDirEntry gsDirEntry[256];
 
 
 void __fastcall__ DIR_read(const char *pDir);
-u8 __fastcall__ DIR_IsValidRomPath(const char romFile[]);
-void __fastcall__ DIR_FullRomPath(char buf[], const char romFile[]);
+u8 __fastcall__ DIR_IsValidFilePath(const char romFile[]);
+void __fastcall__ DIR_FullFilePath(char buf[], const char file[]);
 
 #endif // __LYNX_SD_DIRECTORY__
