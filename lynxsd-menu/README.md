@@ -35,6 +35,7 @@ Version 2.0 Atari Gamer
 * Load last ROM can be set to automatic in preferences
 * ROM preview image is loaded by pressing the Pause button
 * Long names for ROMS (up to 50 characters, via a romlist.txt file)
+* Low power mode is not triggered on ROMs that set EEPROM as file in their header
 
 Below is the original Change Log from the original sources. This information has now been removed from all source files and will be maintained here instead.
 
