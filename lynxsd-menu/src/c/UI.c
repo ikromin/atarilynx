@@ -55,7 +55,9 @@ static u8 previewPal[16];
 
 static u8 currentUiLine = 0;
 static u8 curDirDispOffset = 0;
+static u8 curRomDispOffset = 0;
 static s8 curDirDispScrollDir = -1;
+static s8 curRomDispScrollDir = -1;
 static u8 skipAnimFrames = 0;
 
 
@@ -264,11 +266,17 @@ void UI_resetPalette() {
 void UI_selectPrevious() {
   if (gnSelectIndex > 0) gnSelectIndex--;
   if (currentUiLine > 0) currentUiLine--;
+
+  curRomDispOffset = 0;
+  curRomDispScrollDir = -1;
 }
 
 void UI_selectNext() {
   if (gnSelectIndex < gnNumDirEntries - 1) gnSelectIndex++;
 	if (currentUiLine < MAX_UI_LINES && currentUiLine < gnNumDirEntries - 1) currentUiLine++;
+
+  curRomDispOffset = 0;
+  curRomDispScrollDir = -1;
 }
 
 
@@ -277,6 +285,9 @@ void UI_selectPrevious2() {
 	else gnSelectIndex -= MAX_UI_LINES;
   
   if (currentUiLine > gnSelectIndex) currentUiLine = gnSelectIndex;
+
+  curRomDispOffset = 0;
+  curRomDispScrollDir = -1;
 }
 
 
@@ -287,16 +298,23 @@ void UI_selectNext2() {
 	else gnSelectIndex += MAX_UI_LINES;
 
   if (currentUiLine > validLastLine) currentUiLine = validLastLine;
+
+  curRomDispOffset = 0;
+  curRomDispScrollDir = -1;
 }
 
 
 void UI_forwardAction() {
 	currentUiLine = 0;
+  curDirDispOffset = 0;
+  curDirDispScrollDir = -1;
 }
 
 
 void UI_backAction() {
 	currentUiLine = 0;
+  curDirDispOffset = 0;
+  curDirDispScrollDir = -1;
 }
 
 
@@ -306,6 +324,7 @@ void UI_showDirectory() {
   u8 highlightOffset = 10 * currentUiLine;
   u8 curLine, startIndex, lineIndex;
   u8 dirLen = strlen(gszCurrentDir);
+  u8 romLen = 0;
 
 	tgi_clear();
   tgi_sprite(&menuSprite);
@@ -329,8 +348,23 @@ void UI_showDirectory() {
       // sprite data picked from file type map
       (&fileSprite)->data = fileTypesMap[dirEntry->bDirectory];
 
-      // TODO show 16 chars at a time
-      tgi_outtextxy(5, (curLine * 10) + 6, dirEntry->szLongName);
+      // display a directory entry, scroll if currently selected
+      romLen = strlen(dirEntry->szLongName);
+      if (romLen > 16) {
+        if (currentUiLine == curLine) {
+          strncpy(curentDirPart, &(dirEntry->szLongName[curRomDispOffset]), 16);
+
+          if (skipAnimFrames == 0) {
+            if (curRomDispOffset + 16 > romLen || curRomDispOffset == 0) curRomDispScrollDir *= -1;
+            curRomDispOffset += curRomDispScrollDir;
+          }
+        }
+        else strncpy(curentDirPart, dirEntry->szLongName, 16);
+
+        tgi_outtextxy(5, (curLine * 10) + 6, curentDirPart);
+      }
+      else tgi_outtextxy(5, (curLine * 10) + 6, dirEntry->szLongName);
+
       (&fileSprite)->vpos = (curLine * 10) + 5;
       tgi_sprite(&fileSprite);
     }
@@ -341,7 +375,7 @@ void UI_showDirectory() {
 
   // display current directory
   tgi_setcolor(4);
-  if (dirLen > 19) {
+  if (dirLen > 18) {
     strncpy(curentDirPart, &gszCurrentDir[curDirDispOffset], 18);
     tgi_outtextxy(5, 89, curentDirPart);
   }
@@ -355,7 +389,7 @@ void UI_showDirectory() {
   if (skipAnimFrames++ > SKIP_ANIM_FRAMES) {
     skipAnimFrames = 0;
 
-    if (curDirDispOffset + 19 > dirLen || curDirDispOffset == 0) curDirDispScrollDir *= -1;
+    if (curDirDispOffset + 18 > dirLen || curDirDispOffset == 0) curDirDispScrollDir *= -1;
     curDirDispOffset += curDirDispScrollDir;
   }
 }
