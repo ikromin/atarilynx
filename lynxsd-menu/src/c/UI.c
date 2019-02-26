@@ -25,8 +25,12 @@
 #define WAIT_TGI while (tgi_busy());
 #define TGI_CENTER_ECHO(y, t) tgi_outtextxy((160 - (strlen(t) * 8)) / 2, y, t)
 
+#define SKIP_ANIM_FRAMES 30
+
 extern u8 joystickActionDelay;
+
 extern char gszCurrentDir[256];
+static char curentDirPart[19];
 
 static char* fileTypesMap[] = {
   &img_rom[0], &img_dir[0], &img_no[0], &img_yes[0]
@@ -50,6 +54,9 @@ static u8 blackPal[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 static u8 previewPal[16];
 
 static u8 currentUiLine = 0;
+static u8 curDirDispOffset = 0;
+static s8 curDirDispScrollDir = -1;
+static u8 skipAnimFrames = 0;
 
 
 /**
@@ -298,6 +305,7 @@ void UI_showDirectory() {
   u32 scrollPos = (7400 * (u32) gnSelectIndex) / (100 * (u32) (gnNumDirEntries - 1));
   u8 highlightOffset = 10 * currentUiLine;
   u8 curLine, startIndex, lineIndex;
+  u8 dirLen = strlen(gszCurrentDir);
 
 	tgi_clear();
   tgi_sprite(&menuSprite);
@@ -333,10 +341,21 @@ void UI_showDirectory() {
 
   // display current directory
   tgi_setcolor(4);
-  tgi_outtextxy(5, 89, (gszCurrentDir[0] == 0 ? TXT_ROOT_DIR : gszCurrentDir));
+  if (dirLen > 19) {
+    strncpy(curentDirPart, &gszCurrentDir[curDirDispOffset], 18);
+    tgi_outtextxy(5, 89, curentDirPart);
+  }
+  else tgi_outtextxy(5, 89, (gszCurrentDir[0] == 0 ? TXT_ROOT_DIR : gszCurrentDir));
 
   tgi_setcolor(1);
   tgi_bar(153, 5 + scrollPos, 154, 9 + scrollPos); // scrollbar indicator
 
 	tgi_updatedisplay();
+
+  if (skipAnimFrames++ > SKIP_ANIM_FRAMES) {
+    skipAnimFrames = 0;
+
+    if (curDirDispOffset + 19 > dirLen || curDirDispOffset == 0) curDirDispScrollDir *= -1;
+    curDirDispOffset += curDirDispScrollDir;
+  }
 }
