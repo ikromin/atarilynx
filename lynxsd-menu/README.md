@@ -14,17 +14,32 @@ By placing a file called ```romlist.txt``` in a directory you can specify long R
 An example file is like so...
 
 ```
-gateszen.lnx|Gates of Zendocon
-alien.lnx|Alien vs Predator
-apb.lnx|All Points Bulletin
-awegolf.lnx|Awesome Golf
+[gateszen.lnx]Gates of Zendocon
+[alien.lnx]Alien vs Predator
+[apb.lnx]All Points Bulletin
+[awegolf.lnx]Awesome Golf
 ```
 
-Note that there is a pipe separator character between the short DOS (8.3) file name and the long ROM name. Maximum length for a ROM name is 50 characters.
+Note that the short DOS (8.3) file name is in square brackets, followed by the long ROM name. Maximum length for a ROM name is 50 characters.
+
+The DOS (8.3) names could be in the form ```romnam~1.lnx```. For the ROM list file to work, you have to specify the ROM file name in this format too. On Windows you can find out these short names from the command prompt by using the ```dir /x``` command in the directory where ROM files appear. Alternatively look in the Lynx SD menu file list and wherever there is an up arrow (↑) in the ROM file name, replace it with a tilde (~) to use in the ROM list file.
+
+Example...
+
+```
+AUSTRA↑1.O
+```
+
+Should have an entry like this in the ```romlist.txt``` file...
+
+```
+[AUSTRA~1.O]Australia Day Mini-Demo
+```
 
 # Change Log
 
 Version 2.0 Atari Gamer
+
 * Whole new UI experience
  * Faster scrolling in the file list (controlled by preference option)
  * Scrollbar showing location of selected file in the overall list

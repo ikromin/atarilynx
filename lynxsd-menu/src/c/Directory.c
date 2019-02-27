@@ -15,9 +15,7 @@ u8 gnSelectIndex = 0;
 u8 gnNumDirEntries = 0;
 u8 ganDirOrder[256];
 SDirEntry gsDirEntry[256];
-char* lfnBuffer = 0;
 
-char gszReadBuffer[256];
 u32 gnReadCurOffset = 0;
 u32 gnReadMaxOffset = 0;
 
@@ -92,23 +90,30 @@ void __fastcall__ DIR_read(const char *pDir) {
 			char listFile[256];
 			DIR_FullFilePath(listFile, ROM_LIST_FILE);
 
+			// list file format is:
+			// [romname.ext]Long Name up to 50 chars
+
 			if (openFileForStreaming(listFile) == FR_OK) {
 				char buf, fileLine[64];
-				u8 idx = 0, lfnIdx = 0;
+				u8 idx = 0, lfnIdx = 0, start83 = 0;
 
 				while (gnReadCurOffset < gnReadMaxOffset) {
 					if (LynxSD_ReadFile(&buf, 1) != FR_OK) { break; }
 					
-					if (buf == '\n') {
+					if (buf == '[') {
+						start83 = 1;
+					}
+					else if (buf == '\n') {
 						if (lfnIdx > 1 && (idx - lfnIdx) <= 50) {
 							fileLine[idx] = 0;
 							AddDirEntry(fileLine, &fileLine[lfnIdx], 0);
 						}
 						idx = 0;
 						lfnIdx = 0;
+						start83 = 0;
 					}
-					else if (idx < 63) {
-						if (buf == '|') {
+					else if (start83 && idx < 63) {
+						if (buf == ']') {
 							fileLine[idx] = 0;
 							lfnIdx = idx + 1;
 						}
