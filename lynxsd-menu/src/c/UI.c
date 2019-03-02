@@ -172,6 +172,7 @@ u8 UI_showPreviewScreen() {
 
   if (fail) {
     tgi_setpalette(masterPal);
+    if (strlen(previewFile) > 19) previewFile[18] = 0; // truncate to fit on screen
     UI_showFailScreen(previewFile);
   }
   else {
