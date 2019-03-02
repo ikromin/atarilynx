@@ -235,6 +235,7 @@ void UI_showHelpScreen() {
 
   WAIT_TGI
   tgi_clear();
+  tgi_setpalette(masterPal);
   
   spritePtr = &genericSprite;
   spritePtr->data = &img_help[0];
@@ -256,13 +257,7 @@ void UI_init() {
     LynxSD_CloseFile();
   }
 
-  WAIT_TGI
-
   tgi_setpalette(masterPal);
-	tgi_setbgcolor(0);
-
-  tgi_clear();
-  tgi_updatedisplay();
 }
 
 

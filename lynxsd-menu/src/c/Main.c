@@ -220,22 +220,14 @@ void processLoop() {
 
 
 void lynxInit() {
-	// clear hardware pallete to start with a blank screen
-	u8* ptr = (u8*) 0xfda0;
-	u8 count = 0x20;
-	while (count--) {
-		*ptr++ = 0;
-	}
-
 	// install TGI driver
 	tgi_install(&lynxtgi);
 	tgi_setframerate(60);
 	tgi_init();
-	CLI();	
-	while (tgi_busy());
-
-	// install joystick driver
-	joy_install(&lynxjoy);
+	CLI();
+	
+	tgi_setbgcolor(0);
+	UI_showHelpScreen();
 }
 
 
@@ -247,13 +239,15 @@ void main() {
 
 	PREFS_load();
 
+	// install joystick driver
+	joy_install(&lynxjoy);
+
 	// try to run the last loaded ROM, if it fails load directory contents
 	// and start the input processing loop
 	if (!runLastROM()) {
 		// show help screen on startup unless disabled in preferences
 		if (preferences[PREF_BOOT_HELP]) {
 			waitingForAction = 1;
-			UI_showHelpScreen();
 		}
 
 		processLoop();
