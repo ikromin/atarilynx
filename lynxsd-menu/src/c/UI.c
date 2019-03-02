@@ -32,8 +32,6 @@
 
 #define SKIP_ANIM_FRAMES 30
 
-extern u8 joystickActionDelay;
-
 extern char gszCurrentDir[256];
 static char curentDirPart[19];
 
