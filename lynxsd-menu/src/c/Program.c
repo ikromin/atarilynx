@@ -13,7 +13,7 @@
 
 #define USE_SD_EEPROM_MASK 0x20
 
-u8 bLaunchLowPower = 1;
+static u8 bLaunchLowPower = 1;
 
 // Object loader from David Huseby and Karri Kaksonen
 static u8 gObjectLoader[] =

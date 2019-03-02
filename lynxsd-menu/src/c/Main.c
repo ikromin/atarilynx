@@ -11,6 +11,7 @@ static u8 waitingForAction = 0;
 static u8 dirListLoaded = 0;
 static u8 resetPalette = 0;
 static u8 action = 0;
+static char romFileName[256] = "";
 
 /**
  * Launches the last loaded ROM if the toggle is active. Toggle is
@@ -19,7 +20,6 @@ static u8 action = 0;
  * switched to no, and vise-versa.
  */
 static u8 runLastROM() {
-	char romFileName[256];
 	u8 joyTriggered = (joy_read(JOY_1) & JOY_BTN_2_MASK) != 0;
 
 	if (preferences[PREF_AUTO_RUN_ROM] ^ joyTriggered)
@@ -52,20 +52,19 @@ static u8 runLastROM() {
  */
 void launchSelectedROM() {
 	SDirEntry *pDir = &gsDirEntry[ganDirOrder[gnSelectIndex]];
-	char romFile[256];
 
 	if (DIR_IsValidFilePath(pDir->szFilename)) {
-		DIR_FullFilePath(romFile, pDir->szFilename);
+		DIR_FullFilePath(romFileName, pDir->szFilename);
 
 		UI_showProgrammingScreen();
 
 		// boot ROM if programming successful
-		if (LynxSD_Program(romFile) == FR_OK) {
+		if (LynxSD_Program(romFileName) == FR_OK) {
 			u16 nDelay = 65535L;
 
 			//-- Write out the last rom played to the sd card
 			if (LynxSD_OpenFile(FILE_LAST_ROM) == FR_OK) {
-				LynxSD_WriteFile(romFile, 256);
+				LynxSD_WriteFile(romFileName, 256);
 				LynxSD_CloseFile();
 			}
 
