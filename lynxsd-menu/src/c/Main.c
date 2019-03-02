@@ -8,9 +8,9 @@
 
 
 static u8 waitingForAction = 0;
-static u8 resetPalette = 0;
 static u8 dirListLoaded = 0;
-
+static u8 resetPalette = 0;
+static u8 action = 0;
 
 /**
  * Launches the last loaded ROM if the toggle is active. Toggle is
@@ -136,17 +136,20 @@ void processLoop() {
 	SDirEntry *pDir;
 
 	while (1) {
-		u8 action = 0;
+		action = 0;
 		Joy_Buffer();
 		
 		// process buttons input
 		if (BJOY_A) { action = 'A'; }
 		if (BJOY_B) { action = 'B'; }
-		if (kbhit()) { action = cgetc(); }
+		if (KEY_HIT) { action = KEY_STATE; }
 
 		// check if we need to wait for action or clear to process actions
 		if (waitingForAction) {
-			if (action) waitingForAction = 0;
+			if (action) {
+				waitingForAction = 0;
+				Joy_Clear();
+			}
 			continue;
 		}
 
@@ -239,8 +242,8 @@ void lynxInit() {
 void main() {
 	// initialise the Lynx, UI and SD cart
 	lynxInit();
-	UI_init();
 	LynxSD_Init();
+	UI_init();
 
 	PREFS_load();
 

@@ -1,22 +1,22 @@
 .interruptor _vbl
 .include "lynx.inc"
-.export _joystickActionDelay
+.export _inputDelay
  
-_joystickActionDelay:
+_inputDelay:
 	.byte   $00
- 
+
 .proc   _vbl: near
  
 .segment "CODE"
 	lda INTSET
 	and #TIMER2_INTERRUPT
-	beq done
+	beq @done
 
-	lda _joystickActionDelay
-	beq done
-	dec _joystickActionDelay
- 
-done:
+	lda _inputDelay
+	beq @done
+	dec _inputDelay
+
+@done:
 	clc
 	rts
 

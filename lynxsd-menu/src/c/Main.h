@@ -4,7 +4,6 @@
 #include <6502.h>
 #include <tgi.h>
 #include <joystick.h>
-#include <conio.h>
 #include <string.h>
 
 #include "Joystick.h"
