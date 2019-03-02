@@ -23,7 +23,7 @@ u32 gnReadMaxOffset = 0;
 static void __fastcall__ AddDirEntry(const char *pIn, const char *pLfnIn, u8 bIsDir)
 {
 	u8 nEntry = 0;
-	int cmp;
+	s8 cmp;
 	SDirEntry *pDir;
 
 	if (gnNumDirEntries == 255) return;
@@ -35,7 +35,7 @@ static void __fastcall__ AddDirEntry(const char *pIn, const char *pLfnIn, u8 bIs
 		// directories first
 		if (bIsDir && !pDir->bDirectory) break;
 
-		cmp = stricmp(pIn, pDir->szFilename);
+		cmp = stricmp(pIn, pDir->szFilename) >> 8; // shift 8 bits because we're using s8 instead of int
 
 		if (cmp == 0) return; // same file name so ignore
 		if ((bIsDir == pDir->bDirectory) && cmp < 0) break;
