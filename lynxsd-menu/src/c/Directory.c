@@ -157,8 +157,9 @@ void __fastcall__ DIR_read(const char *pDir) {
 			}
 
 			if ((bIsLnxFile || (sInfo.fattrib & AM_DIR)) && ((sInfo.fattrib & (AM_SYS|AM_HID)) == 0)) {
+				u8 ignore = strcmp("MENU", sInfo.fname) == 0 || strcmp("_PREVIEW", sInfo.fname) == 0;
 				// special case ignore the "menu" folder
-				if (!((sInfo.fattrib & AM_DIR) && (strcmp("MENU", sInfo.fname) == 0))) {
+				if (!((sInfo.fattrib & AM_DIR) && (ignore))) {
 					AddDirEntry(sInfo.fname, sInfo.fname, (sInfo.fattrib & AM_DIR) != 0 );
 				}
 			}
