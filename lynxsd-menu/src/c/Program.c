@@ -138,7 +138,7 @@ FRESULT __fastcall__ LynxSD_ProgramLYX(const char *pFilename)
 FRESULT __fastcall__ LynxSD_ProgramHomebrew(const char *pFilename)
 {
   FRESULT res = FR_DISK_ERR;
-  u16 nDelay = 65535;
+  u16 nDelay = 65535L;
 
   //-- Try and open homebrew file
   if (LynxSD_OpenFile(pFilename) == FR_OK)

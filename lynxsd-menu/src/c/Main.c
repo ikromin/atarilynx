@@ -61,7 +61,7 @@ void launchSelectedROM() {
 
 		// boot ROM if programming successful
 		if (LynxSD_Program(romFile) == FR_OK) {
-			u16 nDelay = 65535;
+			u16 nDelay = 65535L;
 
 			//-- Write out the last rom played to the sd card
 			if (LynxSD_OpenFile(FILE_LAST_ROM) == FR_OK) {
