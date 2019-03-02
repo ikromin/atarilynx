@@ -36,6 +36,14 @@ Should have an entry like this in the ```romlist.txt``` file...
 [AUSTRA~1.O]Australia Day Mini-Demo
 ```
 
+# Custom Colour Schemes
+
+The colour scheme used for the menu interface can be changed by changing the palette specified in the ```menu/default.pal``` file. This is a 32 byte binary file that sets the Lynx palette using BGR colour values. See 'Another approach for setting palette' over at https://atarilynxdeveloper.wordpress.com/2012/04/25/programming-tutorial-part-6colors/ for more information.
+
+A number of sample palettes have been provided in the menu directory, copy any of the ```.pal``` files and rename as ```default.pal``` for changes to take affect.
+
+If no palette file is found, the default colour scheme will be used.
+
 # Change Log
 
 Version 2.0 Atari Gamer
@@ -51,6 +59,7 @@ Version 2.0 Atari Gamer
 * ROM preview image is loaded by pressing the Pause button
 * Long names for ROMS (up to 50 characters, via a romlist.txt file)
 * Low power mode is not triggered on ROMs that set EEPROM as file in their header
+* Support for custom colour schemes using a palette file
 
 Below is the original Change Log from the original sources. This information has now been removed from all source files and will be maintained here instead.
 

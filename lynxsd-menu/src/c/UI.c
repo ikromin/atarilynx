@@ -25,6 +25,8 @@
 #define TXT_ROOT_DIR "/"
 #define TXT_OLD_PREVIEW_DIR "_PREVIEW/"
 
+#define PALETTE_FILE "menu/default.pal"
+
 #define WAIT_TGI while (tgi_busy());
 #define TGI_CENTER_ECHO(y, t) tgi_outtextxy((160 - (strlen(t) * 8)) / 2, y, t)
 
@@ -250,6 +252,14 @@ void UI_showHelpScreen() {
  * Sets up the palette and background colour and clears the display.
  */
 void UI_init() {
+  // try to read in the palette file if it exists
+  if (LynxSD_OpenFile(PALETTE_FILE) == FR_OK) {
+		LynxSD_ReadFile(masterPal, 32);
+    LynxSD_CloseFile();
+  }
+
+  WAIT_TGI
+
   tgi_setpalette(masterPal);
 	tgi_setbgcolor(0);
 
