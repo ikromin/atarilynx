@@ -1,12 +1,36 @@
-# Lynx SD Menu
+# Lynx SD Menu 2
 
-This is a menu system for loading Atari Lynx ROMs via the Lynx SD Cartridge.
-Original source code from: http://atariage.com/forums/topic/250637-lynx-multi-card-preorders/
-Lynx SD cartridge is made by (RetroHQ)[http://www.retrohq.co.uk]
+This is a menu system for loading Atari Lynx ROMs via the Lynx SD Cartridge. Redesigned and updated by [Atari Gamer](https://atarigamer.com).
 
-# Building
+Features:
 
-To build run ```make all```. This will produce a file ```menu.bin``` that can be used on a SD card inside the Lynx SD Atari Lynx cartridge.
+ * Atari Lynx ROM loading - LNX, LYX, O, and COM files
+ * Game previews via LSD files (with backward compatibility for _PREVIEW directory in the original Lynx SD Menu)
+ * Configurable preferences
+ * Redesigned user interface
+ * Colour theme support
+ * Auto-launch ROM on startup option
+ * Long ROM name support
+ * Support for EEPROM on SD Cart via LNX file header
+
+Original source code from: <http://atariage.com/forums/topic/250637-lynx-multi-card-preorders/>
+Lynx SD cartridge is made by [RetroHQ](http://www.retrohq.co.uk).
+
+# Installation
+Unzip the ```aglnxmenu2.zip``` file in the top/root level directory of the SD card. This will create the following files and directories:
+
+```
+menu/
+	alien.pal
+	default.pal
+	fluoro.pal
+	grey.pal
+	inverse.pal
+	prefs
+_preview/
+	...(many .lsd files)
+menu.bin
+```
 
 # ROM List File
 
@@ -35,6 +59,8 @@ Should have an entry like this in the ```romlist.txt``` file...
 ```
 [AUSTRA~1.O]Australia Day Mini-Demo
 ```
+
+Any ROMs listed in the ROM list file will be automatically shown in the loader menu, even if those ROMs do not exist on the SD card.
 
 # Custom Colour Schemes
 
@@ -91,3 +117,7 @@ Initial version by SainT - Retro HQ
 * Added delay to homebrew loading - seemed to randomly fail to load.
 * Also fixed colour bug related to previews, and scaling bug related to previews.
 ```
+
+# Building from Source
+
+To build run ```make all```. This will produce a file ```menu.bin``` that can be used on a SD card inside the Lynx SD Atari Lynx cartridge.
