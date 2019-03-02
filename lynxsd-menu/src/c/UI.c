@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include "UI.h"
 #include "Directory.h"
+#include "Preferences.h"
 #include "Sprites.h"
 
 /*
@@ -20,7 +21,9 @@
 #define TXT_PROGRAMMING "Loading ROM..."
 #define TXT_FAIL_LOAD "Error loading!"
 #define TXT_NO_ROMS "** NO ROMS **"
+
 #define TXT_ROOT_DIR "/"
+#define TXT_OLD_PREVIEW_DIR "_PREVIEW/"
 
 #define WAIT_TGI while (tgi_busy());
 #define TGI_CENTER_ECHO(y, t) tgi_outtextxy((160 - (strlen(t) * 8)) / 2, y, t)
@@ -145,8 +148,16 @@ u8 UI_showPreviewScreen() {
   drawLoadingScreen(TXT_LOADING_PREVIEW, dirEntry->szFilename);
 	tgi_updatedisplay();
 
+  // get path to ROM file based on preferences
+  if (preferences[PREF_OLD_PREVIEW]) {
+    strcpy(previewFile, TXT_OLD_PREVIEW_DIR);
+    strcat(previewFile, dirEntry->szFilename);
+  }
+  else {
+      DIR_FullFilePath(previewFile, dirEntry->szFilename);
+  }
+
   // LSD file name is the ROM file name with its extension set to LSD
-  DIR_FullFilePath(previewFile, dirEntry->szFilename);
   i = strrchr(previewFile, '.');
   if (i) strcpy(i + 1, "LSD");
 

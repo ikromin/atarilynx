@@ -7,6 +7,7 @@
 #define PREF_AUTO_RUN_ROM 1
 #define PREF_FAST_SCROLL 2
 #define PREF_LONG_NAMES 3
+#define PREF_OLD_PREVIEW 4
 
 #define TXT_PREFS_DIR "** PREFERENCES **"
 
