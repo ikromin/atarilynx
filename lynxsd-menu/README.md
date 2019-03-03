@@ -27,6 +27,8 @@ menu/
 	grey.pal
 	inverse.pal
 	prefs
+	homebrew
+	lastrom
 _preview/
 	...(many .lsd files)
 menu.bin
