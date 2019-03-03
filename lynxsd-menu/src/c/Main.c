@@ -188,6 +188,11 @@ void processLoop() {
 				if (waitingForAction) resetPalette = 1;
 				break;
 
+			case 'R':
+				waitingForAction = 1;
+				UI_showCreditsScreen();
+				break;
+
 			case '1':
 				PREFS_show();
 				break;
@@ -225,8 +230,7 @@ void lynxInit() {
 	tgi_init();
 	CLI();
 	
-	tgi_setbgcolor(0);
-	UI_showHelpScreen();
+	UI_showInitScreen();
 }
 
 
@@ -247,6 +251,7 @@ void main() {
 		// show help screen on startup unless disabled in preferences
 		if (preferences[PREF_BOOT_HELP]) {
 			waitingForAction = 1;
+			UI_showHelpScreen();
 		}
 
 		processLoop();

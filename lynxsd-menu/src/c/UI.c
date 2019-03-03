@@ -27,9 +27,6 @@
 
 #define PALETTE_FILE "menu/default.pal"
 
-#define WAIT_TGI while (tgi_busy());
-#define TGI_CENTER_ECHO(y, t) tgi_outtextxy((160 - (strlen(t) * 8)) / 2, y, t)
-
 #define SKIP_ANIM_FRAMES 30
 
 extern char gszCurrentDir[256];
@@ -63,13 +60,24 @@ static s8 curDirDispScrollDir = -1;
 static s8 curRomDispScrollDir = -1;
 static u8 skipAnimFrames = 0;
 
+static SCB_REHV_PAL* spritePtr;
+
+
+static void waitTgi() {
+  while (tgi_busy());
+  tgi_clear();
+}
+
+
+static void tgi_outtextcentery(u8 y, char* t) {
+  tgi_outtextxy((160 - (strlen(t) * 8)) / 2, y, t);
+}
+
 
 /**
  * Draws the top and bottom 'thick' borders.
  */
 static void drawBorders() {
-  SCB_REHV_PAL* spritePtr;
-
   spritePtr = &borderSprite;
   spritePtr->sprctl0 = BPP_3 | TYPE_NORMAL;
   spritePtr->vpos = 0;
@@ -86,8 +94,6 @@ static void drawBorders() {
  * Draws the loading screen with a top and bottom centered text.
  */
 static void drawLoadingScreen(char topLine[], char bottomLine[]) {
-  SCB_REHV_PAL* spritePtr;
-
   drawBorders();
 
   spritePtr = &genericSprite;
@@ -97,8 +103,8 @@ static void drawLoadingScreen(char topLine[], char bottomLine[]) {
   tgi_sprite(spritePtr);
 
   tgi_setcolor(4);
-  TGI_CENTER_ECHO(1, topLine);
-  TGI_CENTER_ECHO(93, bottomLine);
+  tgi_outtextcentery(1, topLine);
+  tgi_outtextcentery(93, bottomLine);
 }
 
 
@@ -106,8 +112,7 @@ static void drawLoadingScreen(char topLine[], char bottomLine[]) {
  * Screen to display when a previous ROM is being loaded on startup. 
  **/
 void __fastcall__ UI_showLastRomScreen(char romFileName[]) {
-  WAIT_TGI
-  tgi_clear();
+  waitTgi();
 
   drawLoadingScreen(TXT_LASTROM, romFileName);
 	tgi_updatedisplay();
@@ -118,8 +123,7 @@ void __fastcall__ UI_showLastRomScreen(char romFileName[]) {
  * Screen to display when the ROM list is loading.
  */
 void UI_showLoadingDirScreen() {
-  WAIT_TGI
-  tgi_clear();
+  waitTgi();
 
   drawLoadingScreen(TXT_LOADING_DIR, TXT_STANDBY);
 	tgi_updatedisplay();
@@ -142,8 +146,7 @@ u8 UI_showPreviewScreen() {
     return 0;
   }
   
-  WAIT_TGI
-  tgi_clear();
+  waitTgi();
 
   drawLoadingScreen(TXT_LOADING_PREVIEW, dirEntry->szFilename);
 	tgi_updatedisplay();
@@ -176,8 +179,7 @@ u8 UI_showPreviewScreen() {
     UI_showFailScreen(previewFile);
   }
   else {
-    WAIT_TGI
-    tgi_clear();
+    waitTgi();
     tgi_setpalette(previewPal);
     tgi_sprite(&previewSprite);
     tgi_updatedisplay();
@@ -193,8 +195,7 @@ u8 UI_showPreviewScreen() {
 void UI_showProgrammingScreen() {
   SDirEntry* dirEntry = &gsDirEntry[ganDirOrder[gnSelectIndex]];
 
-  WAIT_TGI
-  tgi_clear();
+  waitTgi();
 
   drawLoadingScreen(TXT_PROGRAMMING, dirEntry->szFilename);
   tgi_updatedisplay();
@@ -205,11 +206,9 @@ void UI_showProgrammingScreen() {
  * Screen to display during an error condition.
  */
 void __fastcall__ UI_showFailScreen(char* fileName) {
-  SCB_REHV_PAL* spritePtr;
   SDirEntry* dirEntry = &gsDirEntry[ganDirOrder[gnSelectIndex]];
 
-  WAIT_TGI
-  tgi_clear();
+  waitTgi();
 
   drawBorders();
 
@@ -220,8 +219,8 @@ void __fastcall__ UI_showFailScreen(char* fileName) {
   tgi_sprite(spritePtr);
 
   tgi_setcolor(4);
-  TGI_CENTER_ECHO(1, TXT_FAIL_LOAD);
-  TGI_CENTER_ECHO(93, fileName == 0 ? dirEntry->szFilename : fileName);
+  tgi_outtextcentery(1, TXT_FAIL_LOAD);
+  tgi_outtextcentery(93, fileName == 0 ? dirEntry->szFilename : fileName);
 
   tgi_updatedisplay();
 }
@@ -231,11 +230,7 @@ void __fastcall__ UI_showFailScreen(char* fileName) {
  * Screen to show when the Opt2 button is pressed for help.
  */
 void UI_showHelpScreen() {
-  SCB_REHV_PAL* spritePtr;
-
-  WAIT_TGI
-  tgi_clear();
-  tgi_setpalette(masterPal);
+  waitTgi();
   
   spritePtr = &genericSprite;
   spritePtr->data = &img_help[0];
@@ -243,6 +238,43 @@ void UI_showHelpScreen() {
   spritePtr->hpos = 0;
   tgi_sprite(&genericSprite);
   
+  tgi_updatedisplay();
+}
+
+
+void UI_showInitScreen() {
+  waitTgi();
+  tgi_setpalette(masterPal);
+
+  tgi_setcolor(1);
+  tgi_outtextcentery(41, "Lynx SD");
+  tgi_outtextcentery(51, "Menu Loader 2");
+
+  tgi_setcolor(2);
+  tgi_outtextcentery(26, "retrohq.co.uk");
+  tgi_outtextcentery(66, "atarigamer.com");
+
+  tgi_updatedisplay();
+}
+
+
+void UI_showCreditsScreen() {
+  waitTgi();
+
+  tgi_setcolor(1);
+  tgi_outtextcentery(5, "Lynx SD");
+  tgi_outtextcentery(15, "Menu Loader 2");
+
+  tgi_setcolor(4);
+  tgi_outtextcentery(30, "Original code by");
+  tgi_outtextcentery(40, "SainT");
+
+  tgi_outtextcentery(55, "v1 Improvements");
+  tgi_outtextcentery(65, "GadgetUK");
+
+  tgi_outtextcentery(80, "v2 Redesign");
+  tgi_outtextcentery(90, "Necrocia");
+
   tgi_updatedisplay();
 }
 

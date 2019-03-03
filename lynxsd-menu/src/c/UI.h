@@ -12,6 +12,8 @@ void UI_showLoadingDirScreen();
 u8 UI_showPreviewScreen();
 void UI_showProgrammingScreen();
 void UI_showHelpScreen();
+void UI_showInitScreen();
+void UI_showCreditsScreen();
 
 void UI_clear();
 void UI_resetPalette();
