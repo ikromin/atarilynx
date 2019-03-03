@@ -28,11 +28,11 @@ SEGMENTS=--code-name CODE --rodata-name RODATA --bss-name BSS --data-name DATA
 ASFLAGS=-t $(SYS) -I $(CC65_ASMINC)
 CFLAGS=$(SEGMENTS) --all-cdecl -I . -t $(SYS) -Cl -Or -O
 LDFLAGS=-t $(SYS) $(SYS).lib
-SPRFLAGS=-t6 -p2 -u
+SPRFLAGS=-t6 -p1 -s3
 
 .SUFFIXES:
 .PHONY: clean mkbuild all
-VPATH = src/c src/images
+VPATH = src/c src/images src/asm
 
 LIB_OBJECTS = $(BUILD_DIR)/$(TGI).o $(BUILD_DIR)/$(JOY).o
 
@@ -51,6 +51,13 @@ $(BUILD_DIR)/$(JOY).s:
 	@$(CP) $(CC65_TGT)/$(SYS)/drv/joy/$(JOY).joy $(BUILD_DIR)
 	@$(CO) --code-label _$(SYS)joy $(BUILD_DIR)/$(JOY).joy
 	@$(AS) $(ASFLAGS) $(BUILD_DIR)/$(JOY).s
+
+# == Assembly sources to assembly objects
+ASM_SOURCES = $(wildcard $(SOURCE_DIR)/asm/*.s)
+ASM_OBJECTS = $(patsubst $(SOURCE_DIR)/asm/%.s, $(BUILD_DIR)/%.o, $(ASM_SOURCES))
+$(BUILD_DIR)/%.o: %.s
+	@$(ECHO) == Assembling $< =\> $@
+	@$(AS) $(ASFLAGS) $< -o $@
 
 # == C sources to assembly intermediate files to C objects
 C_SOURCES = $(wildcard $(SOURCE_DIR)/c/*.c)
@@ -72,7 +79,7 @@ $(BUILD_DIR)/%.o: %.bmp
 	@$(AS) $(ASFLAGS) $(BUILD_DIR)/$*.s -o $@
 
 # == Link all objects to final binary
-$(BIN): $(LIB_OBJECTS) $(BMP_OBJECTS) $(C_OBJECTS)
+$(BIN): $(LIB_OBJECTS) $(BMP_OBJECTS) $(ASM_OBJECTS) $(C_OBJECTS)
 	@$(ECHO) == Linking binary executable to $@
 	@$(CL) $(LDFLAGS) $^ -o $@
 

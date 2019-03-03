@@ -1,552 +1,442 @@
+#include <tgi.h>
+#include <string.h>
+#include <stdlib.h>
 #include "UI.h"
+#include "Directory.h"
+#include "Preferences.h"
+#include "Sprites.h"
 
-// Logo icon reference
-extern char icon[];
+/*
+ ******************************************************************************
+ Functions for rendering the user interface
+ ******************************************************************************
+ */
 
-unsigned char masterpal[]={0x01,0x01,0x01,0x05,0x08,0x0B,0x0D,0x03,0x05,0x0F,0x03,0x07,0x0A,0x0C,0x0F,0x09,
-														0x11,0x11,0x03,0x07,0x6B,0x9E,0xBF,0x49,0x55,0xFF,0x33,0x77,0xAA,0x66,0x3F,0x15};
-unsigned char blackpal[]={0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-														0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
-static unsigned char currentpal[]={0x01,0x01,0x01,0x05,0x08,0x0B,0x0D,0x03,0x05,0x0F,0x03,0x07,0x0A,0x0C,0x0F,0x09,
-														0x11,0x11,0x03,0x07,0x6B,0x9E,0xBF,0x49,0x55,0xFF,0x33,0x77,0xAA,0x66,0x3F,0x15};
 
-static char preview[8365];
-static u8 nPreviewDelay = 0;
-static u8 nRevertPalette = 0;
-static u8 nDisplayIcon = 0;
-static u8 gnIconLine = 255;
-static u8 gnTopLine = 0, gnSelectedLine = 0;
+#define TXT_LASTROM "Loading last ROM..."
+#define TXT_STANDBY "Please stand by"
+#define TXT_LOADING_DIR "Loading ROM list..."
+#define TXT_LOADING "Loading..."
+#define TXT_LOADING_PREVIEW "Loading preview..."
+#define TXT_PROGRAMMING "Loading ROM..."
+#define TXT_FAIL_LOAD "Error loading!"
+#define TXT_NO_ROMS "** NO ROMS **"
 
-SCB_REHV_PAL iconsprite =  {
-	BPP_4 | TYPE_NONCOLL,
-	LITERAL | REHV,
-	0x00,
-  0x0000,
-  &icon[0],
-  106,
-	0,
-	0xFF,
-	0xFF,
-	{0x01,0x23,0x45,0x67,0x89,0xAB,0xCD,0xEF}
+#define TXT_ROOT_DIR "/"
+#define TXT_OLD_PREVIEW_DIR "_PREVIEW/"
+
+#define PALETTE_FILE "menu/default.pal"
+
+#define SKIP_ANIM_FRAMES 30
+
+extern char gszCurrentDir[256];
+static char curentDirPart[19];
+
+static char* fileTypesMap[] = {
+  &img_rom[0], &img_dir[0], &img_no[0], &img_yes[0]
 };
 
-SCB_REHV_PAL previewsprite =  {
-	BPP_4 | TYPE_NONCOLL,
-	LITERAL | REHV,
-	0x00,
-  0x0000,
-  &preview[0],
-  0,
-	0,
-	0x100,
-	0x100,
-	{0x01,0x23,0x45,0x67,0x89,0xAB,0xCD,0xEF}
+// pallete colours in 0x0GBR format, 4 rows of 4 colours each
+u8 masterPal[] = {
+  // green values
+  0x0000 >> 8,    0x030b >> 8,    0x0333 >> 8,    0x0444 >> 8,
+  0x0999 >> 8,    0x0115 >> 8,    0x0aaa >> 8,    0x0aaa >> 8,
+  0x0aaa >> 8,    0x0aaa >> 8,    0x0aaa >> 8,    0x0aaa >> 8,
+  0x0aaa >> 8,    0x0aaa >> 8,    0x0aaa >> 8,    0x0aaa >> 8,
+  // blue and red values
+  0x0000 & 0xff,  0x030b & 0xff,  0x0333 & 0xff,  0x0444 & 0xff,	
+  0x0999 & 0xff,  0x0115 & 0xff,  0x0aaa & 0xff,  0x0aaa & 0xff,
+  0x0aaa & 0xff,  0x0aaa & 0xff,  0x0aaa & 0xff,  0x0aaa & 0xff,	
+  0x0aaa & 0xff,  0x0aaa & 0xff,  0x0aaa & 0xff,  0x0aaa & 0xff
 };
 
+static u8 blackPal[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+static u8 previewPal[16];
 
-static u8 GetLightColor()
-{
-	u8 pen = 0;
-	u8 green = 0;
-	u8 iX = 0;
-	for (iX=0;iX<16;iX++)
-	{
-		if (currentpal[iX] > green)
-		{
-			green = currentpal[iX];
-			pen = iX;
-		}
-	}
-	return pen;
+static u8 currentUiLine = 0;
+static u8 curDirDispOffset = 0;
+static u8 curRomDispOffset = 0;
+static s8 curDirDispScrollDir = -1;
+static s8 curRomDispScrollDir = -1;
+static u8 skipAnimFrames = 0;
+
+static SCB_REHV_PAL* spritePtr;
+
+
+static void waitTgi() {
+  while (tgi_busy());
+  tgi_clear();
 }
 
 
-static u8 GetDarkColor()
-{
-	u8 pen = 0;
-	u8 green = 255;
-	u8 iX = 0;
-	for (iX=0;iX<16;iX++)
-	{
-		if ((currentpal[iX] < green) && (iX != 0))
-		{
-			green = currentpal[iX];
-			pen = iX;
-		}
-	}
-	return pen;
+static void tgi_outtextcentery(u8 y, char* t) {
+  tgi_outtextxy((160 - (strlen(t) * 8)) / 2, y, t);
 }
 
 
-static FRESULT __fastcall__ LynxSD_ReadIcon(const char *pFilename, char *image, char *palette)
-{
-	FRESULT res = FR_DISK_ERR;
-	if (LynxSD_OpenFile(pFilename) == FR_OK)
-	{	
-		if (LynxSD_ReadFile(image, 8365) == FR_OK)
-		{
-			if (LynxSD_ReadFile(palette, 32) == FR_OK)
-			{
-				res = FR_OK;
+/**
+ * Draws the top and bottom 'thick' borders.
+ */
+static void drawBorders() {
+  spritePtr = &borderSprite;
+  spritePtr->sprctl0 = BPP_3 | TYPE_NORMAL;
+  spritePtr->vpos = 0;
+  tgi_sprite(spritePtr);
+
+  spritePtr = &borderSprite;
+  spritePtr->sprctl0 = BPP_3 | TYPE_NORMAL | VFLIP;
+  spritePtr->vpos = 101;
+  tgi_sprite(spritePtr);
+}
+
+
+/**
+ * Draws the loading screen with a top and bottom centered text.
+ */
+static void drawLoadingScreen(char topLine[], char bottomLine[]) {
+  drawBorders();
+
+  spritePtr = &genericSprite;
+  spritePtr->data = &img_loading[0];
+  spritePtr->vpos = 26;
+  spritePtr->hpos = 26;
+  tgi_sprite(spritePtr);
+
+  tgi_setcolor(4);
+  tgi_outtextcentery(1, topLine);
+  tgi_outtextcentery(93, bottomLine);
+}
+
+
+/**
+ * Screen to display when a previous ROM is being loaded on startup. 
+ **/
+void __fastcall__ UI_showLastRomScreen(char romFileName[]) {
+  waitTgi();
+
+  drawLoadingScreen(TXT_LASTROM, romFileName);
+	tgi_updatedisplay();
+}
+
+
+/**
+ * Screen to display when the ROM list is loading.
+ */
+void UI_showLoadingDirScreen() {
+  waitTgi();
+
+  drawLoadingScreen(TXT_LOADING_DIR, TXT_STANDBY);
+	tgi_updatedisplay();
+}
+
+
+/**
+ * Screen to display when a ROM preview is selected. Will first
+ * show a loading screen and then if the LSD preview file exists it
+ * will be shown, otherwise an error screen will be shown.
+ */
+u8 UI_showPreviewScreen() {
+  SDirEntry* dirEntry = &gsDirEntry[ganDirOrder[gnSelectIndex]];
+  char previewFile[256];
+  char* i;
+  u8 fail = 1;
+
+  // previews can only be shown for file type entries
+  if (dirEntry->bDirectory != 0) {
+    return 0;
+  }
+  
+  waitTgi();
+
+  drawLoadingScreen(TXT_LOADING_PREVIEW, dirEntry->szFilename);
+	tgi_updatedisplay();
+
+  // get path to ROM file based on preferences
+  if (preferences[PREF_OLD_PREVIEW]) {
+    strcpy(previewFile, TXT_OLD_PREVIEW_DIR);
+    strcat(previewFile, dirEntry->szFilename);
+  }
+  else {
+      DIR_FullFilePath(previewFile, dirEntry->szFilename);
+  }
+
+  // LSD file name is the ROM file name with its extension set to LSD
+  i = strrchr(previewFile, '.');
+  if (i) strcpy(i + 1, "LSD");
+
+	if (LynxSD_OpenFile(previewFile) == FR_OK) {
+		if (LynxSD_ReadFile(img_preview, 8365) == FR_OK) {
+			if (LynxSD_ReadFile(previewPal, 32) == FR_OK) {
+        fail = 0;
 			}
 		}
 		LynxSD_CloseFile();
 	}
 
-	return res;
+  if (fail) {
+    tgi_setpalette(masterPal);
+    if (strlen(previewFile) > 19) previewFile[18] = 0; // truncate to fit on screen
+    UI_showFailScreen(previewFile);
+  }
+  else {
+    waitTgi();
+    tgi_setpalette(previewPal);
+    tgi_sprite(&previewSprite);
+    tgi_updatedisplay();
+  }
+
+  return 1;
 }
 
 
-static void DisplayDirectory()
-{
-	SDirEntry *pDir;
-	char pIcon[256];
+/**
+ * Screen to display when a ROM file is being programmed into the cart.
+ */
+void UI_showProgrammingScreen() {
+  SDirEntry* dirEntry = &gsDirEntry[ganDirOrder[gnSelectIndex]];
 
-	u8 i = 0;
-	u8 line = 0;
-	u8 nMax = gnNumDirEntries - gnTopLine;
+  waitTgi();
 
-	if (nMax > 12)
-	{
-		nMax = 12;
-	}
-	nMax += gnTopLine;
-	line = gnTopLine;
- 
+  drawLoadingScreen(TXT_PROGRAMMING, dirEntry->szFilename);
+  tgi_updatedisplay();
+}
+
+
+/**
+ * Screen to display during an error condition.
+ */
+void __fastcall__ UI_showFailScreen(char* fileName) {
+  SDirEntry* dirEntry = &gsDirEntry[ganDirOrder[gnSelectIndex]];
+
+  waitTgi();
+
+  drawBorders();
+
+  spritePtr = &genericSprite;
+  spritePtr->data = &img_fail[0];
+  spritePtr->vpos = 26;
+  spritePtr->hpos = 26;
+  tgi_sprite(spritePtr);
+
+  tgi_setcolor(4);
+  tgi_outtextcentery(1, TXT_FAIL_LOAD);
+  tgi_outtextcentery(93, fileName == 0 ? dirEntry->szFilename : fileName);
+
+  tgi_updatedisplay();
+}
+
+
+/**
+ * Screen to show when the Opt2 button is pressed for help.
+ */
+void UI_showHelpScreen() {
+  waitTgi();
+  
+  spritePtr = &genericSprite;
+  spritePtr->data = &img_help[0];
+  spritePtr->vpos = 0;
+  spritePtr->hpos = 0;
+  tgi_sprite(&genericSprite);
+  
+  tgi_updatedisplay();
+}
+
+
+void UI_showInitScreen() {
+  waitTgi();
+  tgi_setpalette(masterPal);
+
+  tgi_setcolor(1);
+  tgi_outtextcentery(41, "Lynx SD");
+  tgi_outtextcentery(51, "Menu Loader 2");
+
+  tgi_setcolor(2);
+  tgi_outtextcentery(26, "retrohq.co.uk");
+  tgi_outtextcentery(66, "atarigamer.com");
+
+  tgi_updatedisplay();
+}
+
+
+void UI_showCreditsScreen() {
+  waitTgi();
+
+  tgi_setcolor(1);
+  tgi_outtextcentery(5, "Lynx SD");
+  tgi_outtextcentery(15, "Menu Loader 2");
+
+  tgi_setcolor(4);
+  tgi_outtextcentery(30, "Original code by");
+  tgi_outtextcentery(40, "SainT");
+
+  tgi_outtextcentery(55, "v1 Improvements");
+  tgi_outtextcentery(65, "GadgetUK");
+
+  tgi_outtextcentery(80, "v2 Redesign");
+  tgi_outtextcentery(90, "Necrocia");
+
+  tgi_updatedisplay();
+}
+
+
+/**
+ * Sets up the palette and background colour and clears the display.
+ */
+void UI_init() {
+  // try to read in the palette file if it exists
+  if (LynxSD_OpenFile(PALETTE_FILE) == FR_OK) {
+		LynxSD_ReadFile(masterPal, 32);
+    LynxSD_CloseFile();
+  }
+
+  tgi_setpalette(masterPal);
+}
+
+
+/**
+ * Sets the palette to all black and clears the display.
+ */
+void UI_clear() {
+	tgi_setpalette(blackPal);
 	tgi_clear();
-
-	while (line < nMax)
-	{
-		u8 nScreenLine = line - gnTopLine;
-
-		pDir = &gsDirEntry[ganDirOrder[line]];
-		if (pDir->bDirectory)
-		{
-			if (nDisplayIcon == 0)
-			{
-				tgi_setcolor(12);
-				tgi_outtextxy(8, 3+(nScreenLine*8), "[");
-				tgi_outtextxy(16, 3+(nScreenLine*8), pDir->szFilename);
-				tgi_outtextxy(16+(strlen(pDir->szFilename)*8), 3+(nScreenLine*8), "]");
-				tgi_setcolor(9);
-			}
-		}
-		else
-		{
-			if (nDisplayIcon == 0)
-			{
-				tgi_outtextxy(8, 3+(nScreenLine*8), pDir->szFilename);
-			}
-		}
-
-		if (nPreviewDelay < 255)
-		{
-			nPreviewDelay++;
-		}
-
-		if (gnSelectedLine == line)
-		{
-			if (nDisplayIcon == 0)
-			{
-				tgi_setcolor(14);
-				tgi_outtextxy(0, 3+(nScreenLine*8), ">");
-				tgi_setcolor(9);
-			}
-
-			if (nPreviewDelay > 192)
-			{
-				if (gnSelectedLine != gnIconLine)
-				{
-
-					strcat(pIcon,"_PREVIEW/");
-
-					i = 0;
-					while ((pDir->szFilename[i] != 46) && (i < 13))
-					{
-						pIcon[9+i] = pDir->szFilename[i];
-						i++;
-					}
-
-					pIcon[i+9] = 46; //.
-					pIcon[i+10] = 76; //L
-					pIcon[i+11] = 83; //S
-					pIcon[i+12] = 68; //D
-					pIcon[i+13] = 00; //null
-
-					if (LynxSD_ReadIcon(pIcon,preview,currentpal) == FR_OK)
-					{
-						tgi_setpalette(currentpal);
-						nDisplayIcon = 1;
-					}
-					else
-					{
-						nDisplayIcon = 0;
-					}
-
-					gnIconLine = gnSelectedLine;	
-				}
-			}// end of delay check
-		}
-
-		line++;
-	}
-	
-	if (nDisplayIcon == 0)
-	{
-		tgi_sprite(&iconsprite);
-	}
-	else	
-	{
-		tgi_sprite(&previewsprite);
-	}
-
-	if (nRevertPalette == 1)
-	{
-		tgi_setpalette(masterpal);
-		nRevertPalette = 0;
-	}
-
-	tgi_updatedisplay();
 }
 
 
-static void CancelPreview()
-{
-	nPreviewDelay = 0;
-	nDisplayIcon = 0;
-	nRevertPalette = 1;
-	gnIconLine = 255;
+/**
+ * Resets the palette to the default.
+ */
+void UI_resetPalette() {
+  tgi_setpalette(masterPal);
 }
 
 
-void runUI() {
-  u8 nJoyDown = 0, nJoyUp = 0, nLastJoy = 0, nJoyDownDelay = 0, nJoyUpDelay = 0;
-	u8 nJoyRight = 0, nJoyLeft = 0, nJoyRightDelay = 0, nJoyLeftDelay = 0;
+void UI_selectPrevious() {
+  if (gnSelectIndex > 0) gnSelectIndex--;
+  if (currentUiLine > 0) currentUiLine--;
 
-  tgi_clear();
-	tgi_setcolor(13);
-	tgi_outtextxy(40, 36, "Menu v1.8");
-	tgi_outtextxy(40, 46, "Reading...");
-	tgi_setcolor(9);
+  curRomDispOffset = 0;
+  curRomDispScrollDir = -1;
+}
+
+void UI_selectNext() {
+  if (gnSelectIndex < gnNumDirEntries - 1) gnSelectIndex++;
+	if (currentUiLine < MAX_UI_LINES && currentUiLine < gnNumDirEntries - 1) currentUiLine++;
+
+  curRomDispOffset = 0;
+  curRomDispScrollDir = -1;
+}
+
+
+void UI_selectPrevious2() {
+  if (gnSelectIndex < MAX_UI_LINES) gnSelectIndex = 0;
+	else gnSelectIndex -= MAX_UI_LINES;
+  
+  if (currentUiLine > gnSelectIndex) currentUiLine = gnSelectIndex;
+
+  curRomDispOffset = 0;
+  curRomDispScrollDir = -1;
+}
+
+
+void UI_selectNext2() {
+	u8 validLastLine = gnSelectIndex % MAX_UI_LINES;
+
+  if (gnSelectIndex + MAX_UI_LINES >= gnNumDirEntries) gnSelectIndex = gnNumDirEntries - 1;
+	else gnSelectIndex += MAX_UI_LINES;
+
+  if (currentUiLine > validLastLine) currentUiLine = validLastLine;
+
+  curRomDispOffset = 0;
+  curRomDispScrollDir = -1;
+}
+
+
+void UI_forwardAction() {
+	currentUiLine = 0;
+  curDirDispOffset = 0;
+  curDirDispScrollDir = -1;
+}
+
+
+void UI_backAction() {
+	currentUiLine = 0;
+  curDirDispOffset = 0;
+  curDirDispScrollDir = -1;
+}
+
+
+void UI_showDirectory() {
+	SDirEntry* dirEntry;
+  u32 scrollPos = (7400 * (u32) gnSelectIndex) / (100 * (u32) (gnNumDirEntries - 1));
+  u8 highlightOffset = 10 * currentUiLine;
+  u8 curLine, startIndex, lineIndex;
+  u8 dirLen = strlen(gszCurrentDir);
+  u8 romLen = 0;
+
+	tgi_clear();
+  tgi_sprite(&menuSprite);
+
+  // draw directory entries if we have any to show
+  if (gnNumDirEntries) {
+    // current selection highlight
+    tgi_setcolor(1);
+    tgi_bar(5, highlightOffset + 5, 133, highlightOffset + 13);
+
+    tgi_setcolor(4);
+
+    startIndex = gnSelectIndex - currentUiLine; // start drawing n lines before current line
+    for (curLine = 0; curLine <= MAX_UI_LINES; curLine++) {
+      // work out the current line directory index
+      lineIndex = startIndex + curLine;
+      if (lineIndex >= gnNumDirEntries) break;
+
+      dirEntry = &gsDirEntry[ganDirOrder[lineIndex]];
+    
+      // sprite data picked from file type map
+      (&fileSprite)->data = fileTypesMap[dirEntry->bDirectory];
+
+      // display a directory entry, scroll if currently selected
+      romLen = strlen(dirEntry->szLongName);
+      if (romLen > 16) {
+        if (currentUiLine == curLine) {
+          strncpy(curentDirPart, &(dirEntry->szLongName[curRomDispOffset]), 16);
+
+          if (skipAnimFrames == 0) {
+            if (curRomDispOffset + 16 > romLen || curRomDispOffset == 0) curRomDispScrollDir *= -1;
+            curRomDispOffset += curRomDispScrollDir;
+          }
+        }
+        else strncpy(curentDirPart, dirEntry->szLongName, 16);
+
+        tgi_outtextxy(5, (curLine * 10) + 6, curentDirPart);
+      }
+      else tgi_outtextxy(5, (curLine * 10) + 6, dirEntry->szLongName);
+
+      (&fileSprite)->vpos = (curLine * 10) + 5;
+      tgi_sprite(&fileSprite);
+    }
+  }
+  else {
+    tgi_outtextxy(5, 6, TXT_NO_ROMS);
+  }
+
+  // display current directory
+  tgi_setcolor(4);
+  if (dirLen > 18) {
+    strncpy(curentDirPart, &gszCurrentDir[curDirDispOffset], 18);
+    tgi_outtextxy(5, 89, curentDirPart);
+  }
+  else tgi_outtextxy(5, 89, (gszCurrentDir[0] == 0 ? TXT_ROOT_DIR : gszCurrentDir));
+
+  tgi_setcolor(1);
+  tgi_bar(153, 5 + scrollPos, 154, 9 + scrollPos); // scrollbar indicator
+
 	tgi_updatedisplay();
 
-	ReadDirectory(gszCurrentDir);
+  if (skipAnimFrames++ > SKIP_ANIM_FRAMES) {
+    skipAnimFrames = 0;
 
-	if (gszCurrentFile[0])
-	{
-		u8 n;
-		for (n = 0; n < gnNumDirEntries; n++)
-		{
-			SDirEntry *pDir = &gsDirEntry[ganDirOrder[n]];
-			if (stricmp(pDir->szFilename, gszCurrentFile) == 0)
-			{
-				gnSelectedLine = n;
-				break;
-			}
-		}
-	}
-
-	while (1)
-	{
-		if (!tgi_busy())
-		{
-			u8 nThisJoy = joy_read(JOY_1);
-			u8 nPressed = nThisJoy & ~nLastJoy;
-			u8 nReleased = ~nThisJoy & nLastJoy;
-			nLastJoy = nThisJoy;
-
-		//-- Reset the repeat counters
-
-			if (JOY_UP(nPressed|nReleased))
-			{
-				nJoyUp = 0;
-				nJoyUpDelay = 14;
-			}
-			if (JOY_DOWN(nPressed|nReleased))
-			{
-				nJoyDown = 0;
-				nJoyDownDelay = 14;
-			}
-
-			if (JOY_RIGHT(nPressed|nReleased))
-			{
-				nJoyRight = 0;
-				nJoyRightDelay = 14;
-			}
-
-			if (JOY_LEFT(nPressed|nReleased))
-			{
-				nJoyLeft = 0;
-				nJoyLeftDelay = 14;
-			}
-
-		//-- Update the repeat counters
-
-			if (JOY_UP(nThisJoy))
-			{
-				nJoyUp++;
-				if (nJoyUp > nJoyUpDelay)
-				{
-					nJoyUp = 1;
-					nJoyUpDelay = 2;
-				}
-			}
-			if (JOY_DOWN(nThisJoy))
-			{
-				nJoyDown++;
-				if (nJoyDown > nJoyDownDelay)
-				{
-					nJoyDown = 1;
-					nJoyDownDelay = 2;
-				}
-			}
-
-			if (JOY_RIGHT(nThisJoy))
-			{
-				nJoyRight++;
-				if (nJoyRight > nJoyRightDelay)
-				{
-					nJoyRight = 1;
-					nJoyRightDelay = 2;
-				}
-			}
-
-			if (JOY_LEFT(nThisJoy))
-			{
-				nJoyLeft++;
-				if (nJoyLeft > nJoyLeftDelay)
-				{
-					nJoyLeft = 1;
-					nJoyLeftDelay = 2;
-				}
-			}
-
-		//-- Do up / down
-
-			if (nJoyUp == 1)
-			{
-				if (gnSelectedLine > 0)
-				{
-					gnSelectedLine--;
-					CancelPreview();
-				}
-			}
-
-			if (nJoyDown == 1)
-			{
-				if (gnSelectedLine < (gnNumDirEntries-1))
-				{
-					gnSelectedLine++;
-					CancelPreview();
-				}
-			}
-
-			if (nJoyRight == 1)
-			{
-				gnSelectedLine+=11;
-				CancelPreview();
-
-				if (gnSelectedLine > (gnNumDirEntries-1))
-				{
-					gnSelectedLine = gnNumDirEntries-1;
-				}
-			}
-
-			if (nJoyLeft == 1)
-			{
-				gnSelectedLine-=11;
-				CancelPreview();
-
-				if ((gnSelectedLine <= 0) || (gnSelectedLine > (gnNumDirEntries-1)))
-				{
-					gnSelectedLine = 0;
-				}
-			}
-
-			//if ((nJoyUp == 1) || (nJoyDown == 1))
-			{
-				if (gnSelectedLine < gnTopLine)
-				{
-					gnTopLine = gnSelectedLine;
-					//gnSelectedLine = gnTopLine+12;
-				}
-				else if (gnSelectedLine >= (gnTopLine + 12))
-				{
-					gnTopLine = gnSelectedLine-11;
-					//gnSelectedLine = gnTopLine;
-				}
-			}
-
-		//-- Selection
-
-			if (kbhit())
-			{
-				switch (cgetc()) 
-					{ 
-						case 'F': 
-							{
-										tgi_flip(); 
-										break; 
-							}
-					}
-
-			}
-
-			if (JOY_BTN_1(nReleased))
-			{
-				SDirEntry *pDir = &gsDirEntry[ganDirOrder[gnSelectedLine]];
-
-			//-- Check for directory actions
-
-				if (pDir->bDirectory)
-				{
-					u8 bDoRead = 0;
-
-				//-- Do back up directory
-
-					if (pDir->szFilename[0] == '.' && pDir->szFilename[1] == '.' && pDir->szFilename[2] == 0)
-					{
-						char *pEnd = gszCurrentDir + strlen(gszCurrentDir);
-						while (--pEnd >= gszCurrentDir)
-						{
-							if ((*pEnd == '/') || (pEnd == gszCurrentDir))
-							{
-								*pEnd = 0;
-								bDoRead = 1;
-								break;
-							}
-						}
-
-					}
-
-				//-- Do forward directory
-					
-					else
-					{
-						if ((strlen(gszCurrentDir) + strlen(pDir->szFilename) + 2) <= 255)
-						{
-							if (gszCurrentDir[0])
-							{
-								strcat(gszCurrentDir, "/");
-							}
-							strcat(gszCurrentDir, pDir->szFilename);
-							bDoRead = 1;
-						}
-					}
-
-					if (bDoRead)
-					{
-						ReadDirectory(gszCurrentDir);
-						gnTopLine = 0;
-						gnSelectedLine = 0;
-						continue;
-					}
-				}
-
-			//-- Otherwise its a file
-
-				else
-				{
-					FRESULT res = FR_DISK_ERR;
-					u8 iX = 0;
-					char gszOldDir[256];
-
-					//store old directory in case the file is bad
-					strcpy(gszOldDir, gszCurrentDir);
-
-					if ((strlen(gszCurrentDir) + strlen(pDir->szFilename) + 2) <= 255)
-					{
-						char *pCurrentEnd = gszCurrentDir + strlen(gszCurrentDir);
-						if (gszCurrentDir[0])
-						{
-							strcat(gszCurrentDir, "/");
-						}
-						strcat(gszCurrentDir, pDir->szFilename);
-
-						tgi_clear();
-						if (nDisplayIcon == 1)
-						{
-							tgi_sprite(&previewsprite);
-							tgi_setbgcolor(GetDarkColor());
-							tgi_setcolor(GetLightColor());
-						}
-						tgi_outtextxy(24, 46, "Programming...");
-						tgi_setbgcolor(0);
-						//tgi_outtextxy(34, 0, gszCurrentDir);
-						tgi_setbgcolor(0);
-						tgi_setcolor(9);
-						tgi_updatedisplay();
-
-						
-			
-						res = LynxSD_Program(gszCurrentDir);
-
-						//boot ROM
-						if (res == FR_OK)
-						{
-							u16 nDelay = 65535;
-
-						//-- Write out the last rom played to the sd card
-						
-							if (LynxSD_OpenFile("menu/lastrom") == FR_OK)
-							{
-								LynxSD_WriteFile(gszCurrentDir, 256);
-								LynxSD_CloseFile();
-							}
-
-							while (nDelay--);
-
-							tgi_setpalette(blackpal);
-							tgi_clear();
-							LaunchROM();
-							*pCurrentEnd = 0;
-						}
-						else
-						{
-							//rom bad, just go back to the previous directory entry selected
-							strcpy(gszCurrentDir,gszOldDir);
-						}
-					}
-				}
-			}
-			else
-			{
-				if (JOY_BTN_2(nReleased))
-				{
-					SDirEntry *pDir = &gsDirEntry[ganDirOrder[0]];
-					gnSelectedLine = 0;
-
-					CancelPreview();
-
-					if (pDir->bDirectory)
-					{
-						u8 bDoRead = 0;
-						if (pDir->szFilename[0] == '.' && pDir->szFilename[1] == '.' && pDir->szFilename[2] == 0)
-						{
-							char *pEnd = gszCurrentDir + strlen(gszCurrentDir);
-							while (--pEnd >= gszCurrentDir)
-							{
-								if ((*pEnd == '/') || (pEnd == gszCurrentDir))
-								{
-									*pEnd = 0;
-									bDoRead = 1;
-									break;
-								}
-							}
-
-						}
-						if (bDoRead)
-						{
-							ReadDirectory(gszCurrentDir);
-							gnTopLine = 0;
-							gnSelectedLine = 0;
-							continue;
-						}
-					}
-				}
-			}
-
-			DisplayDirectory();
-		}
-	};
+    if (curDirDispOffset + 18 > dirLen || curDirDispOffset == 0) curDirDispScrollDir *= -1;
+    curDirDispOffset += curDirDispScrollDir;
+  }
 }

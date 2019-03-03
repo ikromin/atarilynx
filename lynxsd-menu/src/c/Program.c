@@ -11,6 +11,9 @@
 #define MSTERE0 ((volatile u8 *) 0xFD50)
 #define MAPCTL ((volatile u8 *) 0xFFF9)
 
+#define USE_SD_EEPROM_MASK 0x20
+
+static u8 bLaunchLowPower = 1;
 
 // Object loader from David Huseby and Karri Kaksonen
 static u8 gObjectLoader[] =
@@ -40,31 +43,34 @@ static u8 gObjectLoader[] =
 FRESULT __fastcall__ LynxSD_Program(const char *pFilename)
 {
 	FRESULT res = FR_DISK_ERR;
+	bLaunchLowPower = 1; // default ROMs are launched and SD Cart MCU is switched off
 
-	if (LynxSD_OpenFile(pFilename) == FR_OK)
-	{
-		char szHeader[10];
-		LynxSD_ReadFile(szHeader, 10);
+	if (LynxSD_OpenFile(pFilename) == FR_OK) {
+		char szHeader[64];
+		LynxSD_ReadFile(szHeader, 64);
 
 	  //-- Really an object file incorrectly named
-		if ((szHeader[6] == 'B' && szHeader[7] == 'S' && szHeader[8] == '9' && szHeader[9] == '3'))
-		{
+		if ((szHeader[6] == 'B' && szHeader[7] == 'S' && szHeader[8] == '9' && szHeader[9] == '3')) {
 			LynxSD_CloseFile();
 			return LynxSD_ProgramHomebrew(pFilename);
 		}
 
 	  //-- Otherwise check for actual LNX ROM file
-		else if ((szHeader[0] == 'L' && szHeader[1] == 'Y' && szHeader[2] == 'N' && szHeader[3] == 'X'))
-		{
+		else if ((szHeader[0] == 'L' && szHeader[1] == 'Y' && szHeader[2] == 'N' && szHeader[3] == 'X')) {
 			u8 nBlockSize;
 			u16 nBlockSizeBytes;
 			u32 nSize;
 			u16 nBlockCount;
+
+			// determine if SD Cart MCU should keep running
+			// see https://bitbucket.org/atarilynx/lynx/src/cd1c78cf3a25b8e9cb22c930d6204fbe8c6bf3c6/tools/cc65/libsrc/lynx/exehdr.s?at=master&fileviewer=file-view-default
+			if ((szHeader[60] & USE_SD_EEPROM_MASK) == 0) {
+				bLaunchLowPower = 0;
+			}
 			
 			nBlockSize = szHeader[5];
 
-			if ((nBlockSize == 1 || nBlockSize == 2 || nBlockSize == 4 || nBlockSize == 8))
-			{
+			if ((nBlockSize == 1 || nBlockSize == 2 || nBlockSize == 4 || nBlockSize == 8)) {
 				nSize = LynxSD_GetFileSize();
 				nSize -= 64;
 
@@ -79,8 +85,7 @@ FRESULT __fastcall__ LynxSD_Program(const char *pFilename)
 		}
 
 	  //-- Finally just try as a raw LYX file
-		else
-		{
+		else {
 			LynxSD_CloseFile();
 			return LynxSD_ProgramLYX(pFilename);
 		}
@@ -133,7 +138,7 @@ FRESULT __fastcall__ LynxSD_ProgramLYX(const char *pFilename)
 FRESULT __fastcall__ LynxSD_ProgramHomebrew(const char *pFilename)
 {
   FRESULT res = FR_DISK_ERR;
-  u16 nDelay = 65535;
+  u16 nDelay = 65535L;
 
   //-- Try and open homebrew file
   if (LynxSD_OpenFile(pFilename) == FR_OK)
@@ -197,7 +202,8 @@ void LaunchROM()
 		u8 *ptr;
 		u8 count;
 
-		LynxSD_LowPowerMode();
+		if (bLaunchLowPower) LynxSD_LowPowerMode();
+
 		*MSTERE0 = 0; // enable all audio channels
 		asm("sei");
 		*MAPCTL = 0; // memory mapping for boot state
