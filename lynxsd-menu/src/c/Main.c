@@ -100,6 +100,7 @@ static void changeToDirectory(char dirName[]) {
 
 		// save preferences if they are showing before going back to directory list
 		if (prefsShowing) {
+			UI_showLoadingDirScreen();
 			PREFS_save();
 		}
 

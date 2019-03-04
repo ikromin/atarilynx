@@ -28,6 +28,7 @@ static char* prefNames[NUM_PREFS] = {
  * Saves the current preferences state to memory and to file.
  */
 void PREFS_save() {
+	u16 nDelay = 65535L;
 	u8 idx;
 
 	for (idx = 0; idx < NUM_PREFS; idx++) {
@@ -41,6 +42,8 @@ void PREFS_save() {
 	}
 
 	prefsShowing = 0;
+
+	while (nDelay--);
 }
 
 
