@@ -11,6 +11,7 @@
 
 #define MSTERE0 ((volatile u8 *) 0xFD50)
 #define MAPCTL ((volatile u8 *) 0xFFF9)
+#define SCREEN_BUFFER1 0xC038
 
 u8 gaPleaseWait[] =
 {
@@ -26,7 +27,7 @@ u8 gaPleaseWait[] =
 void main() {
 	u8 *ptr;
 	u16 count;
-	u8 *screenMemory = (u8*) 0x8000, *wait = gaPleaseWait;
+	u8 *screenMemory = (u8*) SCREEN_BUFFER1, *wait = gaPleaseWait;
 
 	// set palette colour 0 to black
 	*((volatile u8*) 0xfda0) = 0x00; // green 1
@@ -51,7 +52,7 @@ void main() {
 	for (count = 0; count < 7; count++)
 	{
 		u8 x = 11;
-		screenMemory = (u8*) 0x8D20 + (count * 80) + 18;
+		screenMemory = (u8*) (SCREEN_BUFFER1 + 47*80) + (count * 80) + 18;
 		while (x--)
 		{
 			u8 c = *wait++;
