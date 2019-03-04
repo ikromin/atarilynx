@@ -1,0 +1,64 @@
+[apb.lnx]All Points Bulletin
+[awegolf.lnx]Awesome Golf
+[baseba~1.lnx]Baseball Heroes
+[basketb.lnx]Basketbrawl
+[batman.lnx]Batman Returns
+[battlew.lnx]Battlewheels
+[battlez.lnx]Battlezone 2000
+[billted.lnx]Bill and Ted's Excellent Adventure
+[blkout.lnx]Blockout
+[bluelig.lnx]Blue Lightning
+[calgames.lnx]California Games
+[cheqflag.lnx]Checkered Flag
+[chips.lnx]Chip's Challenge
+[cmines2.lnx]Crystal Mines 2
+[dinolymp.lnx]Dinolympics
+[dirty.lnx]Dirty Larry Renegade Cop
+[dracula.lnx]Dracular the Undead
+[electro.lnx]Electrocop
+[gateszen.lnx]Gates of Zendocon
+[gaunt3.lnx]Gauntlet the 3rd Encounter
+[gordo.lnx]Gordo 106
+[harddrv.lnx]Hard Drivin'
+[hockey.lnx]Hockey
+[hydra.lnx]Hydra
+[ishido.lnx]Ishido
+[jconnor.lnx]Jimmy Connors Tennis
+[joust.lnx]Joust
+[klax.lnx]KLAX
+[kungfood.lnx]Kung Food
+[lcasino.lnx]Lynx Casino
+[lemmings.lnx]Lemmings
+[mbvolley.lnx]Malibu Bikini Volleyball
+[mspacman.lnx]Ms Pac-Man
+[nflfoot.lnx]NFL Football
+[ngaiden.lnx]Ninja Gaiden
+[ngaiden3.lnx]Ninja Gaiden III
+[pacland.lnx]Pac-Land
+[paperboy.lnx]Paperboy
+[pinballj.lnx]Pinball Jam
+[pitfight.lnx]Pit Fighter
+[powerfac.lnx]Power Factor
+[rampage.lnx]Rampage
+[rampart.lnx]Rampart
+[roadblst.lnx]Roadblasters
+[robosqsh.lnx]Robo Squash
+[robotron.lnx]Robotron 2084
+[rygar.lnx]Rygar
+[saster~1.lnx]Super Asteroids and Missile Command
+[scrapdog.lnx]Scarpyard Dog
+[shadowb.lnx]Shadow of the Beast
+[shanghai.lnx]Shanghai
+[sskweek.lnx]Super Skweek
+[steeltal.lnx]Steel Talons
+[swblade2.lnx]Switchblade II
+[tcyber~1.lnx]Tournament Cyberball
+[toki.lnx]TOKI
+[tslimewr.lnx]Todd's Adventures in Slimeworld
+[turbosub.lnx]Turbo Sub
+[vikingch.lnx]Viking Child
+[warbirds.lnx]Warbirds
+[wcsoccer.lnx]World Class Fussball/Soccer
+[xenophob.lnx]Xenophobe
+[xybots.lnx]Xybots
+[zarlor.lnx]Zarlor Mercenary
