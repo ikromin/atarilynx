@@ -12,6 +12,7 @@ Features:
  * Auto-launch ROM on startup option
  * Long ROM name support
  * Support for EEPROM on SD Cart via LNX file header
+ * "INSERT GAME" screen is removed quicker
 
 Original source code from: <http://atariage.com/forums/topic/250637-lynx-multi-card-preorders/>
 Lynx SD cartridge is made by [RetroHQ](http://www.retrohq.co.uk).
@@ -32,7 +33,15 @@ menu/
 _preview/
 	...(many .lsd files)
 menu.bin
+menu2stg.bin
 ```
+
+# Multiple Stage Loader
+This version of the Menu Loader uses two stage loading. The first stage ROM ```menu.bin``` initialises the Lynx SD cartridge, clears the screen and loads the second stage loader.
+
+The second stage loader ```menu2stg.bin``` takes care of reading the preferences, current directory, displaying Atari Lynx ROM lists, launching ROMs, etc.
+
+When the Atari Lynx is booted, it will briefly show the 'INSERT GAME' screen. This is normal and the first and second stage loaders should take over.
 
 # ROM List File
 
@@ -88,6 +97,7 @@ Version 2.0 Atari Gamer
 * Long names for ROMS (up to 50 characters, via a romlist.txt file)
 * Low power mode is not triggered on ROMs that set EEPROM as file in their header
 * Support for custom colour schemes using a palette file
+* Added multi-stage loading
 
 Below is the original Change Log from the original sources. This information has now been removed from all source files and will be maintained here instead.
 

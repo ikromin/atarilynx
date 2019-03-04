@@ -236,9 +236,9 @@ void lynxInit() {
 
 
 void main() {
-	// initialise the Lynx, UI and SD cart
+	// initialise the Lynx, UI
+	// no need to init Lynx SD cart as that's done in the first stage loader
 	lynxInit();
-	LynxSD_Init();
 	UI_init();
 
 	PREFS_load();

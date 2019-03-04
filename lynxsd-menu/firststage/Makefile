@@ -1,6 +1,6 @@
 SOURCE_DIR=src
 BUILD_DIR=build
-BIN = menu2stg.bin
+BIN = menu.bin
 
 CC65=$(CC65_HOME)
 CC65_BIN=$(CC65)/bin
@@ -34,7 +34,7 @@ SPRFLAGS=-t6 -p1 -s3
 .PHONY: clean mkbuild all
 VPATH = src/c src/images src/asm
 
-LIB_OBJECTS = $(BUILD_DIR)/$(TGI).o $(BUILD_DIR)/$(JOY).o
+LIB_OBJECTS = $(BUILD_DIR)/$(TGI).o
 
 # == Copy and convert TGI to assembly to TGI object
 $(BUILD_DIR)/$(TGI).o: $(BUILD_DIR)/$(TGI).s
@@ -79,7 +79,7 @@ $(BUILD_DIR)/%.o: %.bmp
 	@$(AS) $(ASFLAGS) $(BUILD_DIR)/$*.s -o $@
 
 # == Link all objects to final binary
-$(BIN): $(LIB_OBJECTS) $(BMP_OBJECTS) $(ASM_OBJECTS) $(C_OBJECTS)
+$(BIN): $(ASM_OBJECTS) $(C_OBJECTS)
 	@$(ECHO) == Linking binary executable to $@
 	@$(CL) $(LDFLAGS) $^ -o $@
 

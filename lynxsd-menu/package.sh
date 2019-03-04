@@ -1,2 +1,10 @@
 rm -f aglnxmenu2.zip
-zip -r aglnxmenu2.zip README.md menu.bin _preview menu
+
+cd firststage
+make clean all
+cp menu.bin ..
+
+cd ..
+make clean all
+
+zip -r aglnxmenu2.zip menu.bin menu2stg.bin README.md _preview menu
