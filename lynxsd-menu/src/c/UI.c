@@ -352,8 +352,6 @@ void UI_selectPrevious2() {
 
 
 void UI_selectNext2() {
-  u8 validLastLine;
-
   if (gnSelectIndex == gnNumDirEntries - 1 || gnNumDirEntries <= MAX_UI_LINES) return;
 
   gnSelectIndex += MAX_UI_LINES + 1;

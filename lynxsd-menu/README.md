@@ -62,7 +62,7 @@ Should have an entry like this in the ```romlist.txt``` file...
 [AUSTRA~1.O]Australia Day Mini-Demo
 ```
 
-Any ROMs listed in the ROM list file will be automatically shown in the loader menu, even if those ROMs do not exist on the SD card.
+Any ROMs listed in the ROM list file that do not exist on the SD card will not be shown i.e. the romlist.txt file only overwrites existing ROM file names.
 
 # Custom Colour Schemes
 
