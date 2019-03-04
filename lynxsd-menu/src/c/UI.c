@@ -27,7 +27,7 @@
 
 #define PALETTE_FILE "menu/default.pal"
 
-#define SKIP_ANIM_FRAMES 30
+#define SKIP_ANIM_FRAMES 5
 
 extern char gszCurrentDir[256];
 static char curentDirPart[19];
@@ -59,6 +59,8 @@ static u8 curRomDispOffset = 0;
 static s8 curDirDispScrollDir = -1;
 static s8 curRomDispScrollDir = -1;
 static u8 skipAnimFrames = 0;
+
+static SDirEntry* dirEntry;
 
 static SCB_REHV_PAL* spritePtr;
 
@@ -136,10 +138,11 @@ void UI_showLoadingDirScreen() {
  * will be shown, otherwise an error screen will be shown.
  */
 u8 UI_showPreviewScreen() {
-  SDirEntry* dirEntry = &gsDirEntry[ganDirOrder[gnSelectIndex]];
   char previewFile[256];
   char* i;
   u8 fail = 1;
+
+  dirEntry = &gsDirEntry[ganDirOrder[gnSelectIndex]];
 
   // previews can only be shown for file type entries
   if (dirEntry->bDirectory != 0) {
@@ -206,7 +209,7 @@ void UI_showProgrammingScreen() {
  * Screen to display during an error condition.
  */
 void __fastcall__ UI_showFailScreen(char* fileName) {
-  SDirEntry* dirEntry = &gsDirEntry[ganDirOrder[gnSelectIndex]];
+  dirEntry = &gsDirEntry[ganDirOrder[gnSelectIndex]];
 
   waitTgi();
 
@@ -366,12 +369,10 @@ void UI_backAction() {
 
 
 void UI_showDirectory() {
-	SDirEntry* dirEntry;
-  u32 scrollPos = (7400 * (u32) gnSelectIndex) / (100 * (u32) (gnNumDirEntries - 1));
-  u8 highlightOffset = 10 * currentUiLine;
   u8 curLine, startIndex, lineIndex;
-  u8 dirLen = strlen(gszCurrentDir);
   u8 romLen = 0;
+  u32 scrollPos = (7400 * (u32) gnSelectIndex) / (100 * (u32) (gnNumDirEntries - 1));
+  u8 dirLen = strlen(gszCurrentDir);
 
 	tgi_clear();
   tgi_sprite(&menuSprite);
@@ -380,7 +381,7 @@ void UI_showDirectory() {
   if (gnNumDirEntries) {
     // current selection highlight
     tgi_setcolor(1);
-    tgi_bar(5, highlightOffset + 5, 133, highlightOffset + 13);
+    tgi_bar(5, (10 * currentUiLine) + 5, 133, (10 * currentUiLine) + 13);
 
     tgi_setcolor(4);
 
@@ -388,7 +389,12 @@ void UI_showDirectory() {
     for (curLine = 0; curLine <= MAX_UI_LINES; curLine++) {
       // work out the current line directory index
       lineIndex = startIndex + curLine;
-      if (lineIndex >= gnNumDirEntries) break;
+      if (lineIndex >= gnNumDirEntries) {
+        // draw blank lines so when there are few directory entries, it takes
+        // about the same amount of time to draw each frame (required for scroll animations)
+        tgi_outtextxy(5, (curLine * 10) + 6, "                ");
+        continue;
+      }
 
       dirEntry = &gsDirEntry[ganDirOrder[lineIndex]];
     
