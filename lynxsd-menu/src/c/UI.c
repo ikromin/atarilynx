@@ -319,6 +319,7 @@ static void resetScrollAnim() {
   curRomDispScrollDir = -1;
 }
 
+
 void UI_selectPrevious() {
   if (gnSelectIndex == 0) return;
 
@@ -358,10 +359,8 @@ void UI_selectNext2() {
   gnSelectIndex += MAX_UI_LINES + 1;
   if (gnSelectIndex > gnNumDirEntries - 1) {
     gnSelectIndex = gnNumDirEntries - 1;
+    currentUiLine = MAX_UI_LINES;
   }
-  
-  validLastLine = gnSelectIndex % (MAX_UI_LINES + 1);
-  if (currentUiLine > validLastLine) currentUiLine = validLastLine;
 
   resetScrollAnim();
 }
@@ -382,7 +381,7 @@ void UI_backAction() {
 
 
 void UI_showDirectory() {
-  u8 curLine, startIndex, lineIndex;
+  u8 curLine, startIndex;
   u8 romLen = 0;
   u32 scrollPos = (7400 * (u32) gnSelectIndex) / (100 * (u32) (gnNumDirEntries - 1));
   u8 dirLen = strlen(gszCurrentDir);
@@ -400,17 +399,15 @@ void UI_showDirectory() {
 
     startIndex = gnSelectIndex - currentUiLine; // start drawing n lines before current line
     for (curLine = 0; curLine <= MAX_UI_LINES; curLine++) {
-      // work out the current line directory index
-      lineIndex = startIndex + curLine;
 
-      if (lineIndex >= gnNumDirEntries) {
+      if (startIndex + curLine >= gnNumDirEntries) {
         // draw blank lines so when there are few directory entries, it takes
         // about the same amount of time to draw each frame (required for scroll animations)
         tgi_outtextxy(5, (curLine * 10) + 6, "                ");
         continue;
       }
 
-      dirEntry = &gsDirEntry[ganDirOrder[lineIndex]];
+      dirEntry = &gsDirEntry[ganDirOrder[startIndex + curLine]];
     
       // sprite data picked from file type map
       (&fileSprite)->data = fileTypesMap[dirEntry->bDirectory];
