@@ -16,8 +16,8 @@ u8 gnNumDirEntries = 0;
 u8 ganDirOrder[256];
 SDirEntry gsDirEntry[256];
 
-u32 gnReadCurOffset = 0;
-u32 gnReadMaxOffset = 0;
+static u32 nReadCurOffset = 0;
+static u32 nReadMaxOffset = 0;
 
 
 static void __fastcall__ AddDirEntry(const char *pIn, const char *pLfnIn, u8 bIsDir, u8 isOverride)
@@ -75,8 +75,8 @@ static void __fastcall__ AddDirEntry(const char *pIn, const char *pLfnIn, u8 bIs
 static FRESULT openFileForStreaming(const char *pFile) {
 	FRESULT res = LynxSD_OpenFile(pFile);
 	if (res == FR_OK) {
-		gnReadCurOffset = 0;
-		gnReadMaxOffset = LynxSD_GetFileSize();
+		nReadCurOffset = 0;
+		nReadMaxOffset = LynxSD_GetFileSize();
 	}
 	return res;
 }
@@ -135,7 +135,7 @@ void __fastcall__ DIR_read(const char *pDir) {
 				char buf, fileLine[64];
 				u8 idx = 0, lfnIdx = 0, start83 = 0;
 
-				while (gnReadCurOffset < gnReadMaxOffset) {
+				while (nReadCurOffset < nReadMaxOffset) {
 					if (LynxSD_ReadFile(&buf, 1) != FR_OK) { break; }
 					
 					if (buf == '[') {
@@ -160,7 +160,7 @@ void __fastcall__ DIR_read(const char *pDir) {
 						idx++;
 					}
 					
-					gnReadCurOffset++;
+					nReadCurOffset++;
 				}
 
 				// get any entries that don't have a new line after them
