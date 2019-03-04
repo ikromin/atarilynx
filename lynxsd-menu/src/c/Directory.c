@@ -103,7 +103,7 @@ void __fastcall__ DIR_read(const char *pDir) {
 					if (buf == '[') {
 						start83 = 1;
 					}
-					else if (buf == '\n') {
+					else if (buf == '\n' || buf == '\r') {
 						if (lfnIdx > 1 && (idx - lfnIdx) <= 50) {
 							fileLine[idx] = 0;
 							AddDirEntry(fileLine, &fileLine[lfnIdx], 0);
