@@ -27,6 +27,7 @@
 
 #define PALETTE_FILE "menu/default.pal"
 
+#define MAX_UI_LINES 7
 #define SKIP_ANIM_FRAMES 5
 
 extern char gszCurrentDir[256];
@@ -313,44 +314,56 @@ void UI_resetPalette() {
 }
 
 
-void UI_selectPrevious() {
-  if (gnSelectIndex > 0) gnSelectIndex--;
-  if (currentUiLine > 0) currentUiLine--;
-
+static void resetScrollAnim() {
   curRomDispOffset = 0;
   curRomDispScrollDir = -1;
 }
 
-void UI_selectNext() {
-  if (gnSelectIndex < gnNumDirEntries - 1) gnSelectIndex++;
-	if (currentUiLine < MAX_UI_LINES && currentUiLine < gnNumDirEntries - 1) currentUiLine++;
+void UI_selectPrevious() {
+  if (gnSelectIndex == 0) return;
 
-  curRomDispOffset = 0;
-  curRomDispScrollDir = -1;
+  if (currentUiLine > 0) currentUiLine--;
+  gnSelectIndex--;
+
+  resetScrollAnim();
+}
+
+void UI_selectNext() {
+  if (gnSelectIndex == gnNumDirEntries - 1) return;
+
+	if (currentUiLine < MAX_UI_LINES && currentUiLine < gnNumDirEntries - 1) currentUiLine++;
+  gnSelectIndex++;
+
+  resetScrollAnim();
 }
 
 
 void UI_selectPrevious2() {
-  if (gnSelectIndex < MAX_UI_LINES) gnSelectIndex = 0;
-	else gnSelectIndex -= MAX_UI_LINES;
+  if (gnNumDirEntries <= MAX_UI_LINES) return;
+
+  if (gnSelectIndex <= MAX_UI_LINES) gnSelectIndex = 0;
+	else gnSelectIndex -= MAX_UI_LINES + 1;
   
   if (currentUiLine > gnSelectIndex) currentUiLine = gnSelectIndex;
 
-  curRomDispOffset = 0;
-  curRomDispScrollDir = -1;
+  resetScrollAnim();
 }
 
 
 void UI_selectNext2() {
-	u8 validLastLine = gnSelectIndex % MAX_UI_LINES;
+  u8 validLastLine;
 
-  if (gnSelectIndex + MAX_UI_LINES >= gnNumDirEntries) gnSelectIndex = gnNumDirEntries - 1;
-	else gnSelectIndex += MAX_UI_LINES;
+  if (gnSelectIndex == gnNumDirEntries - 1 || gnNumDirEntries <= MAX_UI_LINES) return;
 
+  gnSelectIndex += MAX_UI_LINES + 1;
+  if (gnSelectIndex > gnNumDirEntries - 1) {
+    gnSelectIndex = gnNumDirEntries - 1;
+  }
+  
+  validLastLine = gnSelectIndex % (MAX_UI_LINES + 1);
   if (currentUiLine > validLastLine) currentUiLine = validLastLine;
 
-  curRomDispOffset = 0;
-  curRomDispScrollDir = -1;
+  resetScrollAnim();
 }
 
 
@@ -389,6 +402,7 @@ void UI_showDirectory() {
     for (curLine = 0; curLine <= MAX_UI_LINES; curLine++) {
       // work out the current line directory index
       lineIndex = startIndex + curLine;
+
       if (lineIndex >= gnNumDirEntries) {
         // draw blank lines so when there are few directory entries, it takes
         // about the same amount of time to draw each frame (required for scroll animations)

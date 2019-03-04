@@ -3,8 +3,6 @@
 
 #include "LynxSD.h"
 
-#define MAX_UI_LINES 7
-
 void UI_init();
 void __fastcall__ UI_showLastRomScreen(char romFileName[]);
 void __fastcall__ UI_showFailScreen(char* fileName);
