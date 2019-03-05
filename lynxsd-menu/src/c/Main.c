@@ -236,6 +236,8 @@ void processLoop() {
 }
 
 void lynxInit() {
+	u16 nDelay = 65535L;
+	
 	// install TGI driver
 	tgi_install(tgi_static_stddrv);
 	tgi_init();
@@ -244,6 +246,7 @@ void lynxInit() {
 	CLI();
 	
 	UI_showInitScreen();
+	while (nDelay--);
 }
 
 
