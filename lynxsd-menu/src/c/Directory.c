@@ -9,12 +9,20 @@
  */
 
 #define ROM_LIST_FILE "romlist.txt"
+#define MAX_DIR_ENTRIES 255
+
+#define DIR_ENTRY_LFN_LEN 45
+#define DIR_ENTRY_NAMES_LEN (8 + 4 + 1 + DIR_ENTRY_LFN_LEN + 1)
 
 char gszCurrentDir[256] = "";
 u8 gnSelectIndex = 0;
 u8 gnNumDirEntries = 0;
 u8 ganDirOrder[256];
 SDirEntry gsDirEntry[256];
+
+// buffer big enough to hold the 8.3 file name and the 45 character long name
+char gsFilenameBuffer[DIR_ENTRY_NAMES_LEN * MAX_DIR_ENTRIES];
+char *gpFilenamePtr;
 
 static u32 nReadCurOffset = 0;
 static u32 nReadMaxOffset = 0;
@@ -26,7 +34,7 @@ static void __fastcall__ AddDirEntry(const char *pIn, const char *pLfnIn, u8 bIs
 	s8 cmp = -1;
 	SDirEntry *pDir;
 
-	if (gnNumDirEntries == 255) return;
+	if (gnNumDirEntries == MAX_DIR_ENTRIES) return;
 
   //-- Find place to insert entry
 	while (nEntry < gnNumDirEntries) {
@@ -38,9 +46,10 @@ static void __fastcall__ AddDirEntry(const char *pIn, const char *pLfnIn, u8 bIs
 		cmp = stricmp(pIn, pDir->szFilename) >> 8; // shift 8 bits because we're using s8 instead of int
 
 		// long ROM name replacement
-		if (cmp == 0) {
-			strcpy(pDir->szFilename, pIn);
-			strcpy(pDir->szLongName, pLfnIn);
+		if (cmp == 0 && pLfnIn) {
+			pDir->szLongName = gpFilenamePtr;
+			strcpy(gpFilenamePtr, pLfnIn);
+			while (*gpFilenamePtr++);
 			return;
 		}
 
@@ -62,9 +71,21 @@ static void __fastcall__ AddDirEntry(const char *pIn, const char *pLfnIn, u8 bIs
 
   //-- Create the physical new entry
 	pDir = &gsDirEntry[gnNumDirEntries];
-	strcpy(pDir->szFilename, pIn);
-	strcpy(pDir->szLongName, pLfnIn);
 	pDir->bDirectory = bIsDir;
+
+  //-- Store filenames in global buffer to save memory, if no long name provided, just duplicate the pointer
+	
+	pDir->szFilename = gpFilenamePtr;
+	pDir->szLongName = gpFilenamePtr;
+	strcpy(gpFilenamePtr, pIn);
+	while (*gpFilenamePtr++);
+
+	if (pLfnIn)
+	{
+		pDir->szLongName = gpFilenamePtr;
+		strcpy(gpFilenamePtr, pLfnIn);
+		while (*gpFilenamePtr++);
+	}
 
   //-- Insert into sort list
 	ganDirOrder[nEntry] = gnNumDirEntries;
@@ -91,6 +112,7 @@ void __fastcall__ DIR_read(const char *pDir) {
 	u8 bIsLnxFile;
  
 	gnNumDirEntries = 0;
+	gpFilenamePtr = gsFilenameBuffer;
 
 	//-- Open and read the dir
 	if (LynxSD_OpenDir(pDir) == FR_OK) {
@@ -116,7 +138,7 @@ void __fastcall__ DIR_read(const char *pDir) {
 				u8 ignore = strcmp("MENU", sInfo.fname) == 0 || strcmp("_PREVIEW", sInfo.fname) == 0;
 				// special case ignore the "menu" folder
 				if (!((sInfo.fattrib & AM_DIR) && (ignore))) {
-					AddDirEntry(sInfo.fname, sInfo.fname, (sInfo.fattrib & AM_DIR) != 0, 0);
+					AddDirEntry(sInfo.fname, 0, (sInfo.fattrib & AM_DIR) != 0, 0);
 				}
 			}
 		}
@@ -129,10 +151,10 @@ void __fastcall__ DIR_read(const char *pDir) {
 			DIR_FullFilePath(listFile, ROM_LIST_FILE);
 
 			// list file format is:
-			// [romname.ext]Long Name up to 50 chars
+			// [romname.ext]Long ROM Name
 
 			if (openFileForStreaming(listFile) == FR_OK) {
-				char buf, fileLine[64];
+				char buf, fileLine[DIR_ENTRY_NAMES_LEN];
 				u8 idx = 0, lfnIdx = 0, start83 = 0;
 
 				while (nReadCurOffset < nReadMaxOffset) {
@@ -142,7 +164,7 @@ void __fastcall__ DIR_read(const char *pDir) {
 						start83 = 1;
 					}
 					else if (buf == '\n' || buf == '\r') {
-						if (lfnIdx > 1 && (idx - lfnIdx) <= 50) {
+						if (lfnIdx > 1 && (idx - lfnIdx) <= DIR_ENTRY_LFN_LEN) {
 							fileLine[idx] = 0;
 							AddDirEntry(fileLine, &fileLine[lfnIdx], 0, 1);
 						}
@@ -150,7 +172,7 @@ void __fastcall__ DIR_read(const char *pDir) {
 						lfnIdx = 0;
 						start83 = 0;
 					}
-					else if (start83 && idx < 63) {
+					else if (start83 && idx < DIR_ENTRY_NAMES_LEN - 1) {
 						if (buf == ']') {
 							fileLine[idx] = 0;
 							lfnIdx = idx + 1;
@@ -164,7 +186,7 @@ void __fastcall__ DIR_read(const char *pDir) {
 				}
 
 				// get any entries that don't have a new line after them
-				if (lfnIdx > 1 && (idx - lfnIdx) <= 50) {
+				if (lfnIdx > 1 && (idx - lfnIdx) <= DIR_ENTRY_LFN_LEN) {
 					fileLine[idx] = 0;
 					AddDirEntry(fileLine, &fileLine[lfnIdx], 0, 1);
 				}

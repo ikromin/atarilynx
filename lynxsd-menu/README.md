@@ -55,7 +55,7 @@ An example file is like so...
 [awegolf.lnx]Awesome Golf
 ```
 
-Note that the short DOS (8.3) file name is in square brackets, followed by the long ROM name. Maximum length for a ROM name is 50 characters.
+Note that the short DOS (8.3) file name is in square brackets, followed by the long ROM name. Maximum length for a ROM name is 45 characters.
 
 The DOS (8.3) names could be in the form ```romnam~1.lnx```. For the ROM list file to work, you have to specify the ROM file name in this format too. On Windows you can find out these short names from the command prompt by using the ```dir /x``` command in the directory where ROM files appear. Alternatively look in the Lynx SD menu file list and wherever there is an up arrow (↑) in the ROM file name, replace it with a tilde (~) to use in the ROM list file.
 
@@ -94,7 +94,7 @@ Version 2.0 Atari Gamer
 * Help screen shown on startup (controlled by preference option)
 * Load last ROM can be set to automatic in preferences
 * ROM preview image is loaded by pressing the Pause button
-* Long names for ROMS (up to 50 characters, via a romlist.txt file)
+* Long names for ROMS (up to 45 characters, via a romlist.txt file)
 * Low power mode is not triggered on ROMs that set EEPROM as file in their header
 * Support for custom colour schemes using a palette file
 * Added multi-stage loading

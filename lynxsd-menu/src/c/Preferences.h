@@ -11,7 +11,7 @@
 
 #define TXT_PREFS_DIR "** PREFERENCES **"
 
-extern u8 preferences[256];
+extern u8 preferences[];
 extern u8 prefsShowing;
 
 void PREFS_save();
