@@ -133,3 +133,27 @@ Initial version by SainT - Retro HQ
 # Building from Source
 
 To build run ```make all```. This will produce a file ```menu.bin``` that can be used on a SD card inside the Lynx SD Atari Lynx cartridge.
+
+# Credits and Special Mention
+
+Lynx SD Menu Loader 2 was made possible with code from the following people...
+
+* Original code by James Boulton (SainT)
+* v1 Improvements by GadgetUK
+* v2 Redesign by Igor Kromin (Necrocia)
+
+A big thanks goes out to the following people for helping test this loader and providing additional code suggestions and fixes:
+
+* Karri Kaksonen (karri)
+* Alex Thissen (LX)
+* James Boulton (SainT)
+
+# License
+
+Copyright 2019 Igor Kromin
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
