@@ -79,7 +79,7 @@ $(BUILD_DIR)/%.o: %.bmp
 	@$(AS) $(ASFLAGS) $(BUILD_DIR)/$*.s -o $@
 
 # == Link all objects to final binary
-$(BIN): $(LIB_OBJECTS) $(BMP_OBJECTS) $(ASM_OBJECTS) $(C_OBJECTS)
+$(BIN): $(BMP_OBJECTS) $(ASM_OBJECTS) $(C_OBJECTS)
 	@$(ECHO) == Linking binary executable to $@
 	@$(CL) $(LDFLAGS) $^ -o $@
 
