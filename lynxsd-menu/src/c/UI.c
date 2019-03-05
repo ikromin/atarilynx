@@ -332,7 +332,7 @@ void UI_selectPrevious() {
 void UI_selectNext() {
   if (gnSelectIndex == gnNumDirEntries - 1) return;
 
-	if (currentUiLine < MAX_UI_LINES && currentUiLine < gnNumDirEntries - 1) currentUiLine++;
+  if (currentUiLine < MAX_UI_LINES && currentUiLine < gnNumDirEntries - 1) currentUiLine++;
   gnSelectIndex++;
 
   resetScrollAnim();
@@ -352,12 +352,18 @@ void UI_selectPrevious2() {
 
 
 void UI_selectNext2() {
-  if (gnSelectIndex == gnNumDirEntries - 1 || gnNumDirEntries <= MAX_UI_LINES) return;
+  u16 maxUI = (gnNumDirEntries > MAX_UI_LINES) ? (gnNumDirEntries - (MAX_UI_LINES + 1)) : 0;
+
+  if (gnSelectIndex == gnNumDirEntries - 1) return;
 
   gnSelectIndex += MAX_UI_LINES + 1;
-  if (gnSelectIndex > gnNumDirEntries - 1) {
+  if (gnSelectIndex >= gnNumDirEntries) {
     gnSelectIndex = gnNumDirEntries - 1;
-    currentUiLine = MAX_UI_LINES;
+  }
+
+  if (gnSelectIndex > maxUI)
+  {
+	  currentUiLine = gnSelectIndex - maxUI;
   }
 
   resetScrollAnim();
@@ -441,7 +447,10 @@ void UI_showDirectory() {
     strncpy(curentDirPart, &gszCurrentDir[curDirDispOffset], 18);
     tgi_outtextxy(5, 89, curentDirPart);
   }
-  else tgi_outtextxy(5, 89, (gszCurrentDir[0] == 0 ? TXT_ROOT_DIR : gszCurrentDir));
+  else
+  {
+	  tgi_outtextxy(5, 89, (gszCurrentDir[0] == 0 ? TXT_ROOT_DIR : gszCurrentDir));
+  }
 
   tgi_setcolor(1);
   tgi_bar(153, 5 + scrollPos, 154, 9 + scrollPos); // scrollbar indicator

@@ -12,7 +12,7 @@ Features:
  * Auto-launch ROM on startup option
  * Long ROM name support
  * Support for EEPROM on SD Cart via LNX file header
- * "INSERT GAME" screen is removed quicker
+ * "INSERT GAME" screen is removed quicker on boot
 
 Original source code from: <http://atariage.com/forums/topic/250637-lynx-multi-card-preorders/>
 Lynx SD cartridge is made by [RetroHQ](http://www.retrohq.co.uk).
