@@ -12,6 +12,7 @@ Features:
  * Auto-launch ROM on startup option
  * Long ROM name support
  * Support for EEPROM on SD Cart via LNX file header
+ * "INSERT GAME" screen is removed quicker on boot
 
 Original source code from: <http://atariage.com/forums/topic/250637-lynx-multi-card-preorders/>
 Lynx SD cartridge is made by [RetroHQ](http://www.retrohq.co.uk).
@@ -32,7 +33,15 @@ menu/
 _preview/
 	...(many .lsd files)
 menu.bin
+menu2stg.bin
 ```
+
+# Multiple Stage Loader
+This version of the Menu Loader uses two stage loading. The first stage ROM ```menu.bin``` initialises the Lynx SD cartridge, clears the screen and loads the second stage loader.
+
+The second stage loader ```menu2stg.bin``` takes care of reading the preferences, current directory, displaying Atari Lynx ROM lists, launching ROMs, etc.
+
+When the Atari Lynx is booted, it will briefly show the 'INSERT GAME' screen. This is normal and the first and second stage loaders should take over.
 
 # ROM List File
 
@@ -46,7 +55,7 @@ An example file is like so...
 [awegolf.lnx]Awesome Golf
 ```
 
-Note that the short DOS (8.3) file name is in square brackets, followed by the long ROM name. Maximum length for a ROM name is 50 characters.
+Note that the short DOS (8.3) file name is in square brackets, followed by the long ROM name. Maximum length for a ROM name is 45 characters.
 
 The DOS (8.3) names could be in the form ```romnam~1.lnx```. For the ROM list file to work, you have to specify the ROM file name in this format too. On Windows you can find out these short names from the command prompt by using the ```dir /x``` command in the directory where ROM files appear. Alternatively look in the Lynx SD menu file list and wherever there is an up arrow (↑) in the ROM file name, replace it with a tilde (~) to use in the ROM list file.
 
@@ -62,7 +71,7 @@ Should have an entry like this in the ```romlist.txt``` file...
 [AUSTRA~1.O]Australia Day Mini-Demo
 ```
 
-Any ROMs listed in the ROM list file will be automatically shown in the loader menu, even if those ROMs do not exist on the SD card.
+Any ROMs listed in the ROM list file that do not exist on the SD card will not be shown i.e. the romlist.txt file only overwrites existing ROM file names.
 
 # Custom Colour Schemes
 
@@ -85,9 +94,10 @@ Version 2.0 Atari Gamer
 * Help screen shown on startup (controlled by preference option)
 * Load last ROM can be set to automatic in preferences
 * ROM preview image is loaded by pressing the Pause button
-* Long names for ROMS (up to 50 characters, via a romlist.txt file)
+* Long names for ROMS (up to 45 characters, via a romlist.txt file)
 * Low power mode is not triggered on ROMs that set EEPROM as file in their header
 * Support for custom colour schemes using a palette file
+* Added multi-stage loading
 
 Below is the original Change Log from the original sources. This information has now been removed from all source files and will be maintained here instead.
 
@@ -123,3 +133,27 @@ Initial version by SainT - Retro HQ
 # Building from Source
 
 To build run ```make all```. This will produce a file ```menu.bin``` that can be used on a SD card inside the Lynx SD Atari Lynx cartridge.
+
+# Credits and Special Mention
+
+Lynx SD Menu Loader 2 was made possible with code from the following people...
+
+* Original code by James Boulton (SainT)
+* v1 Improvements by GadgetUK
+* v2 Redesign by Igor Kromin (Necrocia)
+
+A big thanks goes out to the following people for helping test this loader and providing additional code suggestions and fixes:
+
+* Karri Kaksonen (karri)
+* Alex Thissen (LX)
+* James Boulton (SainT)
+
+# License
+
+Copyright 2019 Igor Kromin
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

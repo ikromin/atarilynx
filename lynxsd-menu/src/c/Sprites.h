@@ -40,7 +40,7 @@ SCB_REHV_PAL genericSprite = {
 
 // used to draw file type images
 SCB_REHV_PAL fileSprite = {
-	BPP_3 | TYPE_NORMAL, REHV, 0x0,
+	BPP_3 | TYPE_BACKGROUND, REHV, 0x0,
   0x0, &img_rom[0],
   134, 0,
 	0x0100, 0x0100,
@@ -49,37 +49,37 @@ SCB_REHV_PAL fileSprite = {
 
 // used to draw the menu interface
 SCB_REHV menuSprite6 = {
-	BPP_3 | TYPE_NORMAL, REUSEPAL, 0x0,
+	BPP_3 | TYPE_BACKGROUND, REUSEPAL, 0x0,
   0x0, &img_menuscrl[0],
   153, 5,
 	0x0100, 0x0100
 };
 SCB_REHV menuSprite5 = {
-	BPP_3 | TYPE_NORMAL, REUSEPAL, 0x0,
+	BPP_3 | TYPE_BACKGROUND, REUSEPAL, 0x0,
   (char*) &menuSprite6, &img_menusep[0],
   5, 86,
 	0x0100, 0x0100
 };
 SCB_REHV menuSprite4 = {
-	BPP_3 | TYPE_NORMAL | VFLIP, REUSEPAL, 0x0,
+	BPP_3 | TYPE_BACKGROUND | VFLIP, REUSEPAL, 0x0,
   (char*) &menuSprite5, &img_menubtb[0],
   2, 101,
 	0x0100, 0x0100
 };
 SCB_REHV menuSprite3 = {
-	BPP_3 | TYPE_NORMAL, REUSEPAL, 0x0,
+	BPP_3 | TYPE_BACKGROUND, REUSEPAL, 0x0,
   (char*) &menuSprite4, &img_menubtb[0],
   2, 0,
 	0x0100, 0x0100
 };
 SCB_REHV menuSprite2 = {
-	BPP_3 | TYPE_NORMAL | HFLIP, REUSEPAL, 0x0,
+	BPP_3 | TYPE_BACKGROUND | HFLIP, REUSEPAL, 0x0,
   (char*) &menuSprite3, &img_menublr[0],
   159, 1,
 	0x0100, 0x0100
 };
 SCB_REHV_PAL menuSprite = {
-	BPP_3 | TYPE_NORMAL, REHV, 0x0,
+	BPP_3 | TYPE_BACKGROUND, REHV, 0x0,
   (char*) &menuSprite2, &img_menublr[0],
   0, 1,
 	0x0100, 0x0100,

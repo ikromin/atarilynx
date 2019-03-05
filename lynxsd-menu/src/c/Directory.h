@@ -4,9 +4,9 @@
 #include "LynxSD.h"
 
 typedef struct {
-	char	szFilename[13];
+	char*	szFilename;
 	u8		bDirectory;
-	char  szLongName[50];
+	char*  szLongName;
 } SDirEntry;
 
 
@@ -17,6 +17,8 @@ extern u8 gnNumDirEntries;
 extern u8 ganDirOrder[256];
 extern SDirEntry gsDirEntry[256];
 
+extern char gsFilenameBuffer[];
+extern char *gpFilenamePtr;
 
 void __fastcall__ DIR_read(const char *pDir);
 u8 __fastcall__ DIR_IsValidFilePath(const char romFile[]);

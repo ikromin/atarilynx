@@ -12,7 +12,7 @@
 #define FILE_PREFS "menu/prefs"
 #define NUM_PREFS 5
 
-u8 preferences[256] = { 1, 0, 1, 1, 0 }; // default preferences
+u8 preferences[NUM_PREFS] = { 1, 0, 1, 1, 0 }; // default preferences
 u8 prefsShowing = 0;
 
 static char* prefNames[NUM_PREFS] = {
@@ -28,6 +28,7 @@ static char* prefNames[NUM_PREFS] = {
  * Saves the current preferences state to memory and to file.
  */
 void PREFS_save() {
+	u16 nDelay = 65535L;
 	u8 idx;
 
 	for (idx = 0; idx < NUM_PREFS; idx++) {
@@ -36,11 +37,13 @@ void PREFS_save() {
 	}
 
 	if (LynxSD_OpenFile(FILE_PREFS) == FR_OK) {
-		LynxSD_WriteFile(preferences, 256);
+		LynxSD_WriteFile(preferences, NUM_PREFS);
 		LynxSD_CloseFile();
 	}
 
 	prefsShowing = 0;
+
+	while (nDelay--);
 }
 
 
@@ -49,7 +52,7 @@ void PREFS_save() {
  */
 void PREFS_load() {
 	if (LynxSD_OpenFile(FILE_PREFS) == FR_OK) {
-		LynxSD_ReadFile(preferences, 256);
+		LynxSD_ReadFile(preferences, NUM_PREFS);
 		LynxSD_CloseFile();
 	}
 }
@@ -69,12 +72,19 @@ void PREFS_show() {
 
 	gnSelectIndex = 0;
 	gnNumDirEntries = NUM_PREFS;
+	gpFilenamePtr = gsFilenameBuffer;
+
 	strcpy(gszCurrentDir, TXT_PREFS_DIR);
 	
 	for (idx = 0; idx < NUM_PREFS; idx++) {
 		prefsPtr = &gsDirEntry[idx];
-		strcpy(prefsPtr->szFilename, prefNames[idx]);
-		strcpy(prefsPtr->szLongName, prefNames[idx]);
+
+		prefsPtr->szFilename = gpFilenamePtr;
+		prefsPtr->szLongName = gpFilenamePtr;
+
+		strcpy(gpFilenamePtr, prefNames[idx]);
+		while (*gpFilenamePtr++);
+		
 		prefsPtr->bDirectory = preferences[idx] + 2;
 		ganDirOrder[idx] = idx;
 	}

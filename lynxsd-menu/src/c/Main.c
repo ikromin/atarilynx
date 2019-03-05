@@ -1,4 +1,14 @@
-#include "Main.h"
+#include <6502.h>
+#include <tgi.h>
+#include <joystick.h>
+#include <string.h>
+
+#include "Joystick.h"
+#include "UI.h"
+#include "Program.h"
+#include "Directory.h"
+#include "Preferences.h"
+
 
 /*
  ******************************************************************************
@@ -6,6 +16,8 @@
  ******************************************************************************
  */
 
+
+#define FILE_LAST_ROM "menu/lastrom"
 
 static u8 waitingForAction = 0;
 static u8 dirListLoaded = 0;
@@ -100,6 +112,7 @@ static void changeToDirectory(char dirName[]) {
 
 		// save preferences if they are showing before going back to directory list
 		if (prefsShowing) {
+			UI_showLoadingDirScreen();
 			PREFS_save();
 		}
 
@@ -222,12 +235,12 @@ void processLoop() {
 	}
 }
 
-
 void lynxInit() {
 	// install TGI driver
-	tgi_install(&lynxtgi);
-	tgi_setframerate(60);
+	tgi_install(tgi_static_stddrv);
 	tgi_init();
+	
+	tgi_setframerate(60);	
 	CLI();
 	
 	UI_showInitScreen();
@@ -235,15 +248,15 @@ void lynxInit() {
 
 
 void main() {
-	// initialise the Lynx, UI and SD cart
+	// initialise the Lynx, UI
+	// no need to init Lynx SD cart as that's done in the first stage loader
 	lynxInit();
-	LynxSD_Init();
 	UI_init();
 
 	PREFS_load();
 
 	// install joystick driver
-	joy_install(&lynxjoy);
+	joy_install(lynx_stdjoy_joy);
 
 	// try to run the last loaded ROM, if it fails load directory contents
 	// and start the input processing loop

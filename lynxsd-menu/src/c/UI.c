@@ -27,7 +27,8 @@
 
 #define PALETTE_FILE "menu/default.pal"
 
-#define SKIP_ANIM_FRAMES 30
+#define MAX_UI_LINES 7
+#define SKIP_ANIM_FRAMES 5
 
 extern char gszCurrentDir[256];
 static char curentDirPart[19];
@@ -59,6 +60,8 @@ static u8 curRomDispOffset = 0;
 static s8 curDirDispScrollDir = -1;
 static s8 curRomDispScrollDir = -1;
 static u8 skipAnimFrames = 0;
+
+static SDirEntry* dirEntry;
 
 static SCB_REHV_PAL* spritePtr;
 
@@ -136,10 +139,11 @@ void UI_showLoadingDirScreen() {
  * will be shown, otherwise an error screen will be shown.
  */
 u8 UI_showPreviewScreen() {
-  SDirEntry* dirEntry = &gsDirEntry[ganDirOrder[gnSelectIndex]];
   char previewFile[256];
   char* i;
   u8 fail = 1;
+
+  dirEntry = &gsDirEntry[ganDirOrder[gnSelectIndex]];
 
   // previews can only be shown for file type entries
   if (dirEntry->bDirectory != 0) {
@@ -206,7 +210,7 @@ void UI_showProgrammingScreen() {
  * Screen to display during an error condition.
  */
 void __fastcall__ UI_showFailScreen(char* fileName) {
-  SDirEntry* dirEntry = &gsDirEntry[ganDirOrder[gnSelectIndex]];
+  dirEntry = &gsDirEntry[ganDirOrder[gnSelectIndex]];
 
   waitTgi();
 
@@ -310,44 +314,59 @@ void UI_resetPalette() {
 }
 
 
-void UI_selectPrevious() {
-  if (gnSelectIndex > 0) gnSelectIndex--;
-  if (currentUiLine > 0) currentUiLine--;
-
+static void resetScrollAnim() {
   curRomDispOffset = 0;
   curRomDispScrollDir = -1;
 }
 
-void UI_selectNext() {
-  if (gnSelectIndex < gnNumDirEntries - 1) gnSelectIndex++;
-	if (currentUiLine < MAX_UI_LINES && currentUiLine < gnNumDirEntries - 1) currentUiLine++;
 
-  curRomDispOffset = 0;
-  curRomDispScrollDir = -1;
+void UI_selectPrevious() {
+  if (gnSelectIndex == 0) return;
+
+  if (currentUiLine > 0) currentUiLine--;
+  gnSelectIndex--;
+
+  resetScrollAnim();
+}
+
+void UI_selectNext() {
+  if (gnSelectIndex == gnNumDirEntries - 1) return;
+
+  if (currentUiLine < MAX_UI_LINES && currentUiLine < gnNumDirEntries - 1) currentUiLine++;
+  gnSelectIndex++;
+
+  resetScrollAnim();
 }
 
 
 void UI_selectPrevious2() {
-  if (gnSelectIndex < MAX_UI_LINES) gnSelectIndex = 0;
-	else gnSelectIndex -= MAX_UI_LINES;
+  if (gnNumDirEntries <= MAX_UI_LINES) return;
+
+  if (gnSelectIndex <= MAX_UI_LINES) gnSelectIndex = 0;
+	else gnSelectIndex -= MAX_UI_LINES + 1;
   
   if (currentUiLine > gnSelectIndex) currentUiLine = gnSelectIndex;
 
-  curRomDispOffset = 0;
-  curRomDispScrollDir = -1;
+  resetScrollAnim();
 }
 
 
 void UI_selectNext2() {
-	u8 validLastLine = gnSelectIndex % MAX_UI_LINES;
+  u16 maxUI = (gnNumDirEntries > MAX_UI_LINES) ? (gnNumDirEntries - (MAX_UI_LINES + 1)) : 0;
 
-  if (gnSelectIndex + MAX_UI_LINES >= gnNumDirEntries) gnSelectIndex = gnNumDirEntries - 1;
-	else gnSelectIndex += MAX_UI_LINES;
+  if (gnSelectIndex == gnNumDirEntries - 1) return;
 
-  if (currentUiLine > validLastLine) currentUiLine = validLastLine;
+  gnSelectIndex += MAX_UI_LINES + 1;
+  if (gnSelectIndex >= gnNumDirEntries) {
+    gnSelectIndex = gnNumDirEntries - 1;
+  }
 
-  curRomDispOffset = 0;
-  curRomDispScrollDir = -1;
+  if (gnSelectIndex > maxUI)
+  {
+	  currentUiLine = gnSelectIndex - maxUI;
+  }
+
+  resetScrollAnim();
 }
 
 
@@ -366,12 +385,10 @@ void UI_backAction() {
 
 
 void UI_showDirectory() {
-	SDirEntry* dirEntry;
-  u32 scrollPos = (7400 * (u32) gnSelectIndex) / (100 * (u32) (gnNumDirEntries - 1));
-  u8 highlightOffset = 10 * currentUiLine;
-  u8 curLine, startIndex, lineIndex;
-  u8 dirLen = strlen(gszCurrentDir);
+  u8 curLine, startIndex;
   u8 romLen = 0;
+  u32 scrollPos = (7400 * (u32) gnSelectIndex) / (100 * (u32) (gnNumDirEntries - 1));
+  u8 dirLen = strlen(gszCurrentDir);
 
 	tgi_clear();
   tgi_sprite(&menuSprite);
@@ -380,17 +397,21 @@ void UI_showDirectory() {
   if (gnNumDirEntries) {
     // current selection highlight
     tgi_setcolor(1);
-    tgi_bar(5, highlightOffset + 5, 133, highlightOffset + 13);
+    tgi_bar(5, (10 * currentUiLine) + 5, 133, (10 * currentUiLine) + 13);
 
     tgi_setcolor(4);
 
     startIndex = gnSelectIndex - currentUiLine; // start drawing n lines before current line
     for (curLine = 0; curLine <= MAX_UI_LINES; curLine++) {
-      // work out the current line directory index
-      lineIndex = startIndex + curLine;
-      if (lineIndex >= gnNumDirEntries) break;
 
-      dirEntry = &gsDirEntry[ganDirOrder[lineIndex]];
+      if (startIndex + curLine >= gnNumDirEntries) {
+        // draw blank lines so when there are few directory entries, it takes
+        // about the same amount of time to draw each frame (required for scroll animations)
+        tgi_outtextxy(5, (curLine * 10) + 6, "                ");
+        continue;
+      }
+
+      dirEntry = &gsDirEntry[ganDirOrder[startIndex + curLine]];
     
       // sprite data picked from file type map
       (&fileSprite)->data = fileTypesMap[dirEntry->bDirectory];
@@ -426,7 +447,10 @@ void UI_showDirectory() {
     strncpy(curentDirPart, &gszCurrentDir[curDirDispOffset], 18);
     tgi_outtextxy(5, 89, curentDirPart);
   }
-  else tgi_outtextxy(5, 89, (gszCurrentDir[0] == 0 ? TXT_ROOT_DIR : gszCurrentDir));
+  else
+  {
+	  tgi_outtextxy(5, 89, (gszCurrentDir[0] == 0 ? TXT_ROOT_DIR : gszCurrentDir));
+  }
 
   tgi_setcolor(1);
   tgi_bar(153, 5 + scrollPos, 154, 9 + scrollPos); // scrollbar indicator
