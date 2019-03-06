@@ -1,4 +1,5 @@
 #include "Program.h"
+#include <tgi.h>
 
 /*
  ******************************************************************************
@@ -11,7 +12,7 @@
 #define MSTERE0 ((volatile u8 *) 0xFD50)
 #define MAPCTL ((volatile u8 *) 0xFFF9)
 
-#define USE_SD_EEPROM_MASK 0x20
+#define USE_SD_EEPROM_MASK 0x40
 
 static u8 bLaunchLowPower = 1;
 
@@ -64,7 +65,7 @@ FRESULT __fastcall__ LynxSD_Program(const char *pFilename)
 
 			// determine if SD Cart MCU should keep running
 			// see https://bitbucket.org/atarilynx/lynx/src/cd1c78cf3a25b8e9cb22c930d6204fbe8c6bf3c6/tools/cc65/libsrc/lynx/exehdr.s?at=master&fileviewer=file-view-default
-			if ((szHeader[60] & USE_SD_EEPROM_MASK) == 0) {
+			if (szHeader[60] & USE_SD_EEPROM_MASK) {
 				bLaunchLowPower = 0;
 			}
 			
@@ -204,8 +205,8 @@ void LaunchROM()
 
 		if (bLaunchLowPower) LynxSD_LowPowerMode();
 
-		*MSTERE0 = 0; // enable all audio channels
 		asm("sei");
+		*MSTERE0 = 0; // enable all audio channels
 		*MAPCTL = 0; // memory mapping for boot state
 
 		ptr = (u8*) 0xfd00; // timers and audio fd00
