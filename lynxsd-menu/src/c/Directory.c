@@ -21,7 +21,8 @@ u8 ganDirOrder[256];
 SDirEntry gsDirEntry[256];
 
 // buffer big enough to hold the 8.3 file name and the 45 character long name
-char gsFilenameBuffer[DIR_ENTRY_NAMES_LEN * MAX_DIR_ENTRIES];
+#define FILENAME_BUFFER_SIZE 10240
+char gsFilenameBuffer[FILENAME_BUFFER_SIZE];
 char *gpFilenamePtr;
 
 static u32 nReadCurOffset = 0;
@@ -32,6 +33,7 @@ static void __fastcall__ AddDirEntry(const char *pIn, const char *pLfnIn, u8 bIs
 {
 	u8 nEntry = 0;
 	s8 cmp = -1;
+	u16 nTotalFileLength = strlen(pIn)+1 + (pLfnIn ? strlen(pLfnIn)+1 : 0);
 	SDirEntry *pDir;
 
 	if (gnNumDirEntries == MAX_DIR_ENTRIES) return;
@@ -46,10 +48,14 @@ static void __fastcall__ AddDirEntry(const char *pIn, const char *pLfnIn, u8 bIs
 		cmp = stricmp(pIn, pDir->szFilename) >> 8; // shift 8 bits because we're using s8 instead of int
 
 		// long ROM name replacement
-		if (cmp == 0 && pLfnIn) {
-			pDir->szLongName = gpFilenamePtr;
-			strcpy(gpFilenamePtr, pLfnIn);
-			while (*gpFilenamePtr++);
+		if (cmp == 0 && pLfnIn) 
+		{
+			if (((gsFilenameBuffer + FILENAME_BUFFER_SIZE) - gpFilenamePtr) > strlen(pLfnIn))
+			{
+				pDir->szLongName = gpFilenamePtr;
+				strcpy(gpFilenamePtr, pLfnIn);
+				while (*gpFilenamePtr++);
+			}
 			return;
 		}
 
@@ -69,27 +75,33 @@ static void __fastcall__ AddDirEntry(const char *pIn, const char *pLfnIn, u8 bIs
 		}
 	}
 
-  //-- Create the physical new entry
-	pDir = &gsDirEntry[gnNumDirEntries];
-	pDir->bDirectory = bIsDir;
+//-- Only add if there is enough space in the buffer
 
-  //-- Store filenames in global buffer to save memory, if no long name provided, just duplicate the pointer
-	
-	pDir->szFilename = gpFilenamePtr;
-	pDir->szLongName = gpFilenamePtr;
-	strcpy(gpFilenamePtr, pIn);
-	while (*gpFilenamePtr++);
-
-	if (pLfnIn)
+	if (((gsFilenameBuffer + FILENAME_BUFFER_SIZE) - gpFilenamePtr) >= nTotalFileLength)
 	{
-		pDir->szLongName = gpFilenamePtr;
-		strcpy(gpFilenamePtr, pLfnIn);
-		while (*gpFilenamePtr++);
-	}
 
-  //-- Insert into sort list
-	ganDirOrder[nEntry] = gnNumDirEntries;
-	gnNumDirEntries++;
+	  //-- Create the physical new entry
+		pDir = &gsDirEntry[gnNumDirEntries];
+		pDir->bDirectory = bIsDir;
+
+	  //-- Store filenames in global buffer to save memory, if no long name provided, just duplicate the pointer
+	
+		pDir->szFilename = gpFilenamePtr;
+		pDir->szLongName = gpFilenamePtr;
+		strcpy(gpFilenamePtr, pIn);
+		while (*gpFilenamePtr++);
+
+		if (pLfnIn)
+		{
+			pDir->szLongName = gpFilenamePtr;
+			strcpy(gpFilenamePtr, pLfnIn);
+			while (*gpFilenamePtr++);
+		}
+
+	  //-- Insert into sort list
+		ganDirOrder[nEntry] = gnNumDirEntries;
+		gnNumDirEntries++;
+	}
 }
 
 
