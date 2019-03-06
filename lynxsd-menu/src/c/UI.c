@@ -29,6 +29,7 @@
 
 #define MAX_UI_LINES 7
 #define SKIP_ANIM_FRAMES 5
+#define SKIP_ANIM_FRAMES_START_END 30
 
 extern char gszCurrentDir[256];
 static char curentDirPart[19];
@@ -60,6 +61,7 @@ static u8 curRomDispOffset = 0;
 static s8 curDirDispScrollDir = -1;
 static s8 curRomDispScrollDir = -1;
 static u8 skipAnimFrames = 0;
+static u8 skipAnimFramesDir = 0;
 
 static SDirEntry* dirEntry;
 
@@ -315,6 +317,7 @@ void UI_resetPalette() {
 
 
 static void resetScrollAnim() {
+  skipAnimFrames = 0;
   curRomDispOffset = 0;
   curRomDispScrollDir = -1;
 }
@@ -340,8 +343,6 @@ void UI_selectNext() {
 
 
 void UI_selectPrevious2() {
-  if (gnNumDirEntries <= MAX_UI_LINES) return;
-
   if (gnSelectIndex <= MAX_UI_LINES) gnSelectIndex = 0;
 	else gnSelectIndex -= MAX_UI_LINES + 1;
   
@@ -422,8 +423,10 @@ void UI_showDirectory() {
         if (currentUiLine == curLine) {
           strncpy(curentDirPart, &(dirEntry->szLongName[curRomDispOffset]), 16);
 
-          if (skipAnimFrames == 0) {
-            if (curRomDispOffset + 16 > romLen || curRomDispOffset == 0) curRomDispScrollDir *= -1;
+          if (skipAnimFrames++ > ((curRomDispOffset + 16 >= romLen || curRomDispOffset == 0) ? SKIP_ANIM_FRAMES_START_END : SKIP_ANIM_FRAMES)) 
+		  {
+            skipAnimFrames = 0;
+            if (curRomDispOffset + 16 >= romLen || curRomDispOffset == 0) curRomDispScrollDir = -curRomDispScrollDir;
             curRomDispOffset += curRomDispScrollDir;
           }
         }
@@ -457,10 +460,12 @@ void UI_showDirectory() {
 
 	tgi_updatedisplay();
 
-  if (skipAnimFrames++ > SKIP_ANIM_FRAMES) {
-    skipAnimFrames = 0;
 
-    if (curDirDispOffset + 18 > dirLen || curDirDispOffset == 0) curDirDispScrollDir *= -1;
+
+  if (skipAnimFramesDir++ > ((curDirDispOffset + 18 >= dirLen || curDirDispOffset == 0) ? SKIP_ANIM_FRAMES_START_END : SKIP_ANIM_FRAMES)) {
+    skipAnimFramesDir = 0;
+
+    if (curDirDispOffset + 18 >= dirLen || curDirDispOffset == 0) curDirDispScrollDir = -curDirDispScrollDir;
     curDirDispOffset += curDirDispScrollDir;
   }
 }
