@@ -26,7 +26,7 @@ TGI=$(SYS)-160-102-16
 JOY=$(SYS)-stdjoy
 SEGMENTS=--code-name CODE --rodata-name RODATA --bss-name BSS --data-name DATA
 ASFLAGS=-t $(SYS) -I $(CC65_ASMINC)
-CFLAGS=$(SEGMENTS) --all-cdecl -I . -t $(SYS) -Cl -Or -O
+CFLAGS=$(SEGMENTS) --all-cdecl -I src/headers -t $(SYS) -Cl -Or -O
 LDFLAGS=-t $(SYS) $(SYS).lib
 SPRFLAGS=-t6 -p1 -s3
 
