@@ -1,0 +1,80 @@
+<!--
+ ******************************************************************************
+ Turkey Puncher 3 Turbo: Hyper Punching. An April Fools' parody game.
+
+ Copyright (C) 2019 Igor Kromin
+
+ This program is free software: you can redistribute it and/or modify it under
+ the terms of the GNU General Public License as published by the Free Software
+ Foundation, either version 3 of the License, or (at your option) any later
+ version.
+
+ This program is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License along with
+ this program.  If not, see <https://www.gnu.org/licenses/>.
+ ******************************************************************************
+-->
+<html>
+	<head>
+		<title>Atari Lynx Palette Generator by Igor Kromin</title>
+		<style>
+		textarea { width: 380px; display: block; }
+		pre { clear: both; padding-top: 32px; }
+		.pal { display: inline-block; width: 16px; height: 16px; margin-right: 2px; border: 1px solid black; margin-bottom: 16px; }
+		footer { margin-top: 5em; font-size: 60%; color: grey; }
+		</style>
+	</head>
+<body>
+	<h1>Atari Lynx Palette Generator</h1>
+	<div style="float:left;">
+		Enter 16 HTML colour codes in the text box below and click Generate.<br/>
+		Colours are scaled from two bytes per channel to one byte per channel.<br/>
+		<br/>
+		<textarea id="colours" rows="4">000000, 6e0100, 282214, ae0000, 3c3a38, 4d391d, 484327, 922e2e, 64503c, 84562f, c24e00, 897a70, bb9c57, 9baeae, bababa, ffffff</textarea>
+		<button onclick="gen();">Generate</button>
+	</div>
+	<div id="palette" style="float:left; margin-left: 64px;">
+	</div>
+	<pre id="code"></pre>
+	<footer>written by Igor Kromin</footer>
+	<script>
+		function gen() {
+			var colours = document.getElementById('colours').value.replace(/ /g,'').split(',');
+			
+			var pal = "";
+			var pal2 = "";
+			var green = "";
+			var bluered = "";
+			var count = colours.length > 16 ? 16 : colours.length;
+			
+			for (var i = 0; i < count; i++) {
+				var g = conv(colours[i].substr(2, 2));
+				var b = conv(colours[i].substr(4, 2));
+				var r = conv(colours[i].substr(0, 2));
+			
+				green += '\t0x0' + g + b + r + ' >> 8, ' + "\n"
+				bluered += '\t0x0' + g + b + r + ' & 0xff, ' + "\n"
+
+				pal += '<div class="pal" style="background-color:#' + colours[i] + '"></div>';
+				pal2 += '<div class="pal" style="background-color:#' + r + g + b + '"></div>';
+			}
+			
+			document.getElementById('palette').innerHTML = 
+				'Input Colours:<div>' + pal + '</div>' +
+				'Output Colours:<div>' + pal2 + '</div>';
+
+			document.getElementById('code').innerHTML = 
+				'u8 palette[] = {\n\t// green\n' + green + "\n\t// blue + red\n" + bluered + '};';
+		}
+
+		function conv(c) {
+			return (Math.round(parseInt(c, 16) / 16.5)).toString(16);
+		}
+
+		gen();
+	</script>
+</body>
+</html>
