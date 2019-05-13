@@ -1,6 +1,7 @@
 var canvas = $('#canvas');
 var dndArea = $('.at_play_dnd_area');
 var canvasScale = 2;
+var canvasRotation = 0;
 
 var Module = {
   noInitialRun: true,
@@ -12,7 +13,7 @@ var Module = {
   totalDependencies: 0,
   locateFile: function(path, prefix) {
     if (path == 'handy_libretro.wasm') {
-      return '/retroarch/handy_libretro.wasm';
+      return '/wasm/handy_libretro.wasm';
     }
     return path;
   },
@@ -25,6 +26,21 @@ function setupFileSystem()
 {
   dndArea.text('Loading File System...');
 
+  var r = getParameterByName('r');
+  suffix = '';
+  if (r == '1') {
+    suffix = '_90';
+    canvasRotation = 90;
+  }
+  else if (r == '2') {
+    suffix = '_270';
+    canvasRotation = 270;
+  }
+
+  $('#canvas_div').css({
+    'transform': 'rotate(' + canvasRotation + 'deg)'
+  });
+
   var fsOpts = {
     fs: "MountableFileSystem",
     options: {
@@ -34,7 +50,7 @@ function setupFileSystem()
       '/home/web_user/retroarch/userdata': {
         fs: 'XmlHttpRequest',
         options: {
-          baseUrl: '/retroarch/',
+          baseUrl: '/retroarch' + suffix + '/',
           index: {
             "retroarch.cfg":null,
             "system":{
@@ -196,3 +212,15 @@ $(document).ready(function() {
    
   setupFileSystem();
 });
+
+getParameterByName = function(name)
+{
+  name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+  var regexS = "[\\?&]" + name + "=([^&#]*)";
+  var regex = new RegExp(regexS);
+  var results = regex.exec(window.location.search);
+  if(results == null)
+    return '0';
+  else
+    return decodeURIComponent(results[1].replace(/\+/g, " "));
+}

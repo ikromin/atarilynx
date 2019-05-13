@@ -20,6 +20,7 @@
           transparent 1px,
           transparent 2px
         );
+        padding: 4em;
       }
 
       a {
@@ -71,17 +72,24 @@
     </table>
   </div>
 
-  <div style="display:inline-block;position:relative;">
+  <div id="canvas_div" style="display:inline-block;position:relative;">
     <canvas id="canvas" tabindex="1" oncontextmenu="event.preventDefault()" width="320" height="204" style="background-color: black"></canvas>
-    <div class="at_play_dnd_area"></div>
+    <div id="at_play_dnd_area" class="at_play_dnd_area"></div>
   </div>
 
-  <div style="margin-top:1em;">
+  <div style="margin-top:4em;">
     Screen scale:&nbsp;
     <a href="#" class="at_nav_link at_canv_resize" data-value="1">1x</a>
     <a href="#" class="at_nav_link at_canv_resize" data-value="2">2x</a>
     <a href="#" class="at_nav_link at_canv_resize" data-value="3">3x</a>
     <a href="#" class="at_nav_link at_canv_resize" data-value="4">4x</a>
+  </div>
+
+  <div style="margin-top:1em;">
+    Screen rotation:&nbsp;
+    <a href="/?r=0" class="at_nav_link at_canv_rotate">Normal</a>
+    <a href="/?r=1" class="at_nav_link at_canv_rotate">Left</a>
+    <a href="/?r=2" class="at_nav_link at_canv_rotate">Right</a>
   </div>
   
   <div style="margin-top: 1em" id="at_rom_select">
