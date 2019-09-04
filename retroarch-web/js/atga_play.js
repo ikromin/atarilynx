@@ -52,10 +52,17 @@ function setupFileSystem()
         options: {
           baseUrl: '/retroarch' + suffix + '/',
           index: {
-            "retroarch.cfg":null,
-            "system":{
-              "lynxboot.img":null
-            }
+            "retroarch.cfg":null
+          },
+          preferXHR: true
+        }
+      },
+      '/home/web_user/retroarch/userdata/system': {
+        fs: 'XmlHttpRequest',
+        options: {
+          baseUrl: '/retroarch_system/',
+          index: {
+            "lynxboot.img":null
           },
           preferXHR: true
         }
