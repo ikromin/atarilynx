@@ -22,6 +22,14 @@
 #include <joystick.h>
 #include "Types.h"
 
+#pragma bss-name (push, "ENGZP")
+  extern u8 _engJoyState;
+  #pragma zpsym("_engJoyState")
+
+  extern u8 _engPreviousJoyState;
+  #pragma zpsym("_engPreviousJoyState")
+#pragma bss-name (pop)
+
 // macros for joystick direction states
 #define BJOY_UP _Joy_IsOn(JOY_UP_MASK)
 #define BJOY_DOWN _Joy_IsOn(JOY_DOWN_MASK)

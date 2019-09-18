@@ -25,30 +25,27 @@
  ******************************************************************************
  */
 
-static u8 joyState = 0;
-static u8 previousJoyState = 0;
-
 unsigned char __fastcall__ _Joy_IsOn(u8 mask) {
   // button off
-  if ((joyState & mask) == 0) {
-    if ((previousJoyState & mask) == 0) {
+  if ((_engJoyState & mask) == 0) {
+    if ((_engPreviousJoyState & mask) == 0) {
       return 0;
     }
-    previousJoyState = joyState;
+    _engPreviousJoyState = _engJoyState;
     return 1;
   }
 
   // button on
-  previousJoyState = joyState; // cache button down state
-  joyState ^= mask; // reset buffered button state
+  _engPreviousJoyState = _engJoyState; // cache button down state
+  _engJoyState ^= mask; // reset buffered button state
   
   return 0;
 }
 
 void Joy_Buffer() {
-  joyState |= joy_read(JOY_1);
+  _engJoyState |= joy_read(JOY_1);
 }
 
 void Joy_Clear() {
-  joyState = 0;
+  _engJoyState = 0;
 }

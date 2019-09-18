@@ -59,53 +59,40 @@ char* romNames[] = {
 const u8 contColourArr[] = {1, 2, 6, 2, 7, 2};
 
 #pragma bss-name (push, "ZEROPAGE")
-  u8 processInputs;
-  #pragma zpsym("processInputs")
-
   s8 selectedGame;
   #pragma zpsym("selectedGame")
 
   u8 continueColour;
   #pragma zpsym("continueColour")
-
-  void (*_processInput)(void);
-  #pragma zpsym("_processInput")
-
-  void (*_render)(void);
-  #pragma zpsym("_render")
-
-  void (*_update)(void);
-  #pragma zpsym("_update")
 #pragma bss-name (pop)
 
 
 void __fastcall__ changeState(GS_STATE newState) {
   switch (newState) {
     case GS_LOGO:
-      processInputs = 1;
       continueColour = 0;
-      _processInput = &processInput_Logo;
-      _render = &render_Logo;
-      _update = &update_Logo;
+      _engFuncProcessInput = &processInput_Logo;
+      _engFuncRender = &render_Logo;
+      _engFuncUpdate = &update_Logo;
       break;
 
     case GS_SELECT:
       selectedGame = 0;
-      _processInput = &processInput_Select;
-      _render = &render_Select;
-      _update = &update_Select;
+      _engFuncProcessInput = &processInput_Select;
+      _engFuncRender = &render_Select;
+      _engFuncUpdate = &update_Select;
       break;
     
     case GS_RUN:
-      _processInput = &processInput_Run;
-      _render = &render_Run;
-      _update = &update_Run;
+      _engFuncProcessInput = &processInput_Run;
+      _engFuncRender = &render_Run;
+      _engFuncUpdate = &update_Run;
       break;
     
     case GS_ERROR:
-      _processInput = &processInput_Error;
-      _render = &render_Error;
-      _update = &update_Error;
+      _engFuncProcessInput = &processInput_Error;
+      _engFuncRender = &render_Error;
+      _engFuncUpdate = &update_Error;
       break;
   }
 }

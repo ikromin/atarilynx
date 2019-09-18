@@ -17,7 +17,6 @@
 ******************************************************************************/
 
 #include <stdlib.h>
-#include <time.h>
 #include <6502.h>
 #include "Types.h"
 #include "Joystick.h"
@@ -27,8 +26,16 @@
 #define TIME_PER_UPDATE 3
 
 void main(void)  {
-	time_t previous = 0, current = 0;
-	u8 elapsed = 0, lag = 0;
+	// initialise all game loop times to zero
+	_engTimePrevious = clock();
+	_engTimeCurrent = 0;
+	_engTimeElapsed = 0;
+	_engTimeLag = 0;
+
+	// reset joystick states
+	_engProcessInputs = 1;
+	_engJoyState = 0;
+	_engPreviousJoyState = 0;
 
 	// install TGI driver
 	tgi_install(tgi_static_stddrv);
@@ -44,26 +51,25 @@ void main(void)  {
 
 	changeState(GS_LOGO);
 
-	previous = clock();
 	while (1) {
-		current = clock();
-		elapsed = current - previous;
-		previous = current;
-		lag += elapsed;
+		_engTimeCurrent = clock();
+		_engTimeElapsed = _engTimeCurrent - _engTimePrevious;
+		_engTimePrevious = _engTimeCurrent;
+		_engTimeLag += _engTimeElapsed;
 
-		if (processInputs != 0) {
+		if (_engProcessInputs != 0) {
 			Joy_Buffer();
-			_processInput();
+			_engFuncProcessInput();
 		}
 
-		while (lag >= TIME_PER_UPDATE) {
-			_update();
-			lag -= TIME_PER_UPDATE;
+		while (_engTimeLag >= TIME_PER_UPDATE) {
+			_engFuncUpdate();
+			_engTimeLag -= TIME_PER_UPDATE;
 		}
 
 		// draw a frame if TGI is ready
 		if (!tgi_busy()) {
-			_render();
+			_engFuncRender();
 			tgi_updatedisplay();
 		}
 	}

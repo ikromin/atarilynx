@@ -19,28 +19,43 @@
 #ifndef __LYNX_STATE__
 #define __LYNX_STATE__
 
+#include <time.h>
 #include "Types.h"
 
 #pragma bss-name (push, "ZEROPAGE")
-  extern u8 processInputs;
-  #pragma zpsym("processInputs")
-
   extern s8 selectedGame;
   #pragma zpsym("selectedGame")
 
   extern u8 continueColour;
   #pragma zpsym("continueColour")
-
-  extern void (*_processInput)(void);
-  #pragma zpsym("_processInput")
-
-  extern void (*_render)(void);
-  #pragma zpsym("_render")
-
-  extern void (*_update)(void);
-  #pragma zpsym("_update")
 #pragma bss-name (pop)
 
+
+#pragma bss-name (push, "ENGZP")
+  extern u8 _engProcessInputs;
+  #pragma zpsym("_engProcessInputs")
+
+  extern time_t _engTimePrevious;
+  #pragma zpsym("_engTimePrevious")
+
+  extern time_t _engTimeCurrent;
+  #pragma zpsym("_engTimeCurrent")
+
+	extern u8 _engTimeElapsed;
+  #pragma zpsym("_engTimeElapsed")
+
+  extern u8 _engTimeLag;
+  #pragma zpsym("_engTimeLag")
+
+  extern void (*_engFuncProcessInput)(void);
+  #pragma zpsym("_engFuncProcessInput")
+
+  extern void (*_engFuncUpdate)(void);
+  #pragma zpsym("_engFuncUpdate")
+
+  extern void (*_engFuncRender)(void);
+  #pragma zpsym("_engFuncRender")
+#pragma bss-name (pop)
 
 typedef enum {
   GS_LOGO = 0,
